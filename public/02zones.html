@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zone</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="./dbPodaci">Tabele</a>
+      <a href="./statistika">Statistika</a>
+      <a href="./mapa">Mapa</a>
+      <a href="./01users">Korisnici</a>
+      <a href="./03locations">Uredjaji</a>
+      <a href="./02zones">Objekti</a>
+      <div class="user">
+        <span id="user"></span>
+        <a href="/" id="logout">Logout &#10162;</a>
+      </div>
+    </nav>
+    <div class="insert-zone">
+      <div class="container">
+        <form id="insertNewZone">
+          <input type="text" id="zoneNumber" placeholder="Broj zone" required />
+          <input type="text" id="zoneName" placeholder="Naziv zone" required />
+          <input
+            type="text"
+            name=""
+            id="zoneShort"
+            placeholder="Oznaka"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="zoneLat"
+            placeholder="Latituda"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="zoneLong"
+            placeholder="Longituda"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="zoneMaxFree"
+            placeholder="Kapacitet"
+            required
+          />
+          <button type="submit" id="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+    <script src="./02zones.js"></script>
+  </body>
+</html>

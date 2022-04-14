@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lokacije</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="./dbPodaci">Tabele</a>
+      <a href="./statistika">Statistika</a>
+      <a href="./mapa">Mapa</a>
+      <a href="./01users">Korisnici</a>
+      <a href="./03locations">Uredjaji</a>
+      <a href="./02zones">Objekti</a>
+      <div class="user">
+        <span id="user"></span>
+        <a href="/" id="logout">Logout &#10162;</a>
+      </div>
+    </nav>
+    <div class="insert-location">
+      <div class="container">
+        <form id="insertNewLocation">
+          <input type="text" id="locSname" placeholder="Naziv" required />
+          <input
+            type="text"
+            id="locLname"
+            placeholder="Opis lokacije"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="locType"
+            placeholder="Model"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="locNumber"
+            placeholder="Broj lokacije"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="locDesc"
+            placeholder="Napomena"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="locLat"
+            placeholder="Latituda"
+            required
+          />
+          <input
+            type="text"
+            name=""
+            id="locLong"
+            placeholder="Longituda"
+            required
+          />
+          <button type="submit" id="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+    <div class="container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Naziv lokacije</th>
+            <th>ID</th>
+            <th>Lokacija</th>
+            <th>Datum kreiranja</th>
+            <th>Model</th>
+            <th>Napomena</th>
+          </tr>
+        </thead>
+        <tbody id="locations-table"></tbody>
+      </table>
+    </div>
+  </body>
+  <script src="./03locations.js"></script>
+</html>

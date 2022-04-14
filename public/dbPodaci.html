@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parking servis</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="./dbPodaci">Tabele</a>
+      <a href="./statistika">Statistika</a>
+      <a href="./mapa">Mapa</a>
+      <a href="./01users">Korisnici</a>
+      <a href="./03locations">Uredjaji</a>
+      <a href="./02zones">Objekti</a>
+      <div class="user">
+        <span id="user"></span>
+        <a href="/" id="logout">Logout &#10162;</a>
+      </div>
+    </nav>
+    <section>
+      <div class="container">
+        <h1>Podaci iz baze podataka</h1>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Objekat</th>
+              <th>Oznaka</th>
+              <th>Kapacitet</th>
+              <th>Slobodno</th>
+              <th></th>
+              <th>Popunjenost</th>
+            </tr>
+          </thead>
+          <tbody id="table1"></tbody>
+        </table>
+      </div>
+      <div class="container">
+        <h2>Popunjenost objekta</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Objekat</th>
+              <th>Oznaka</th>
+              <th>Kapacitet</th>
+              <th>Slobodno</th>
+              <th></th>
+              <th>Popunjenost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="lok_01">
+              <th>Vuk</th>
+              <td>Vuk</td>
+              <td>119</td>
+              <td id="sl_mesta_01">119</td>
+              <td id="prom_01" class="prom"></td>
+              <td id="pop_01">100</td>
+            </tr>
+            <tr id="lok_02">
+              <th>Slavija</th>
+              <td>Sla</td>
+              <td>110</td>
+              <td id="sl_mesta_02">110</td>
+              <td id="prom_02" class="prom"></td>
+              <td id="pop_02">100</td>
+            </tr>
+            <tr id="lok_03">
+              <th>MGM</th>
+              <td>Mgm</td>
+              <td>310</td>
+              <td id="sl_mesta_03">310</td>
+              <td id="prom_03" class="prom"></td>
+              <td id="pop_03">100</td>
+            </tr>
+            <tr id="lok_04">
+              <th>Cvetkova pijaca</th>
+              <td>CvP</td>
+              <td>81</td>
+              <td id="sl_mesta_04">81</td>
+              <td id="prom_04" class="prom"></td>
+              <td id="pop_04">100</td>
+            </tr>
+            <tr id="lok_05">
+              <th>Mali Kalemegdan</th>
+              <td>Mk</td>
+              <td>114</td>
+              <td id="sl_mesta_05">114</td>
+              <td id="prom_05" class="prom"></td>
+              <td id="pop_05">100</td>
+            </tr>
+            <tr id="lok_06">
+              <th>Donji Grad</th>
+              <td>Dg</td>
+              <td>389</td>
+              <td id="sl_mesta_06">389</td>
+              <td id="prom_06" class="prom"></td>
+              <td id="pop_06">100</td>
+            </tr>
+            <tr id="lok_07">
+              <th>Politika</th>
+              <td>Pol</td>
+              <td>55</td>
+              <td id="sl_mesta_07">55</td>
+              <td id="prom_07" class="prom"></td>
+              <td id="pop_07">100</td>
+            </tr>
+            <tr id="lok_08">
+              <th>Kamenička</th>
+              <td>Kam</td>
+              <td>95</td>
+              <td id="sl_mesta_08">95</td>
+              <td id="prom_08" class="prom"></td>
+              <td id="pop_08">100</td>
+            </tr>
+            <tr id="lok_09">
+              <th>Viška</th>
+              <td>Vis</td>
+              <td>48</td>
+              <td id="sl_mesta_09">48</td>
+              <td id="prom_09" class="prom"></td>
+              <td id="pop_09">100</td>
+            </tr>
+            <tr id="lok_10">
+              <th>Čukarica</th>
+              <td>Cuk</td>
+              <td>79</td>
+              <td id="sl_mesta_10">79</td>
+              <td id="prom_10" class="prom"></td>
+              <td id="pop_10">100</td>
+            </tr>
+            <tr id="lok_11">
+              <th>Baba Višnjina</th>
+              <td>BV</td>
+              <td>351</td>
+              <td id="sl_mesta_11">351</td>
+              <td id="prom_11" class="prom"></td>
+              <td id="pop_11">100</td>
+            </tr>
+            <tr id="lok_12">
+              <th>Botanička bašta</th>
+              <td>BBa</td>
+              <td>244</td>
+              <td id="sl_mesta_12">244</td>
+              <td id="prom_12" class="prom"></td>
+              <td id="pop_12">100</td>
+            </tr>
+            <tr id="lok_13">
+              <th>Opština Novi Beograd</th>
+              <td>ONBG</td>
+              <td>120</td>
+              <td id="sl_mesta_13">120</td>
+              <td id="prom_13" class="prom"></td>
+              <td id="pop_13">100</td>
+            </tr>
+            <tr id="lok_14">
+              <th>VMA</th>
+              <td>Vma</td>
+              <td>574</td>
+              <td id="sl_mesta_14">574</td>
+              <td id="prom_14" class="prom"></td>
+              <td id="pop_14">100</td>
+            </tr>
+            <tr id="lok_15">
+              <th>Obillićev venac</th>
+              <td>Obi</td>
+              <td>608</td>
+              <td id="sl_mesta_15">608</td>
+              <td id="prom_15" class="prom"></td>
+              <td id="pop_15">100</td>
+            </tr>
+            <tr id="lok_16">
+              <th>Zeleni venac</th>
+              <td>Zel</td>
+              <td>266</td>
+              <td id="sl_mesta_16">266</td>
+              <td id="prom_16" class="prom"></td>
+              <td id="pop_16">100</td>
+            </tr>
+            <tr id="lok_17">
+              <th>Masarikova</th>
+              <td>Mas</td>
+              <td>457</td>
+              <td id="sl_mesta_17">457</td>
+              <td id="prom_17" class="prom"></td>
+              <td id="pop_17">100</td>
+            </tr>
+            <tr id="lok_18">
+              <th>Pionirski park</th>
+              <td>Pio</td>
+              <td>461</td>
+              <td id="sl_mesta_18">461</td>
+              <td id="prom_18" class="prom"></td>
+              <td id="pop_18">100</td>
+            </tr>
+            <tr id="lok_19">
+              <th>Dr Aleksandra Kostića</th>
+              <td>Drak</td>
+              <td>59</td>
+              <td id="sl_mesta_19">59</td>
+              <td id="prom_19" class="prom"></td>
+              <td id="pop_19">100</td>
+            </tr>
+            <tr id="lok_20">
+              <th>Sava Centar</th>
+              <td>Scn</td>
+              <td>361</td>
+              <td id="sl_mesta_20">361</td>
+              <td id="prom_20" class="prom"></td>
+              <td id="pop_20">100</td>
+            </tr>
+            <tr id="lok_21">
+              <th>Belvil</th>
+              <td>Bel</td>
+              <td>417</td>
+              <td id="sl_mesta_21">417</td>
+              <td id="prom_21" class="prom"></td>
+              <td id="pop_21">100</td>
+            </tr>
+            <tr id="lok_22">
+              <th>Ada ciganlija</th>
+              <td>Ada</td>
+              <td>1176</td>
+              <td id="sl_mesta_22">1176</td>
+              <td id="prom_22" class="prom"></td>
+              <td id="pop_22">100</td>
+            </tr>
+            <tr id="lok_23">
+              <th>Kapetanija</th>
+              <td>Kap</td>
+              <td>64</td>
+              <td id="sl_mesta_23">64</td>
+              <td id="prom_23" class="prom"></td>
+              <td id="pop_23">100</td>
+            </tr>
+            <tr id="lok_24">
+              <th>Železnička stanica NBG</th>
+              <td>ZSNBG</td>
+              <td>269</td>
+              <td id="sl_mesta_24">269</td>
+              <td id="prom_24" class="prom"></td>
+              <td id="pop_24">100</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <script src="./vezaSaServerom.js"></script>
+    <!-- <script type="module" src="./loginUser.js"></script> -->
+  </body>
+</html>

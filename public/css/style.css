@@ -1,0 +1,140 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  font-family: "Roboto", sans-serif;
+}
+.container {
+  text-align: center;
+  width: 100%;
+  padding: 0 1rem;
+  margin: 1rem 0;
+}
+.container h1 {
+  margin: 50px 0;
+}
+h2 {
+  margin: 50px 0;
+}
+h3 {
+  margin: 30px 0;
+}
+.remove {
+  display: none !important;
+}
+/* Header */
+nav {
+  height: 5vh;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  background: rgb(1, 1, 22);
+  padding: 2rem;
+}
+nav a {
+  font-size: 1.4rem;
+  text-decoration: none;
+  cursor: pointer;
+  color: rgb(250, 249, 255);
+}
+nav a:hover {
+  color: rgb(234, 232, 253);
+  transform: translate(1px, 1px);
+}
+.user span {
+  color: rgb(185, 185, 185);
+  font-size: 1.2rem;
+}
+
+/* Tabele */
+.table {
+  margin: 0 auto;
+  width: 100%;
+}
+thead {
+  border-top: 1px solid #e1e1e1;
+}
+tbody tr:nth-child(odd) {
+  background: #e1e1e1;
+}
+td {
+  padding: 8px;
+}
+.prom {
+  width: 50px;
+}
+/* Statistika */
+section {
+  display: flex;
+  justify-content: space-between;
+  margin: 2.2rem 1.2rem;
+}
+.grafikon {
+  width: 45%;
+}
+@media (max-width: 800px) {
+  section {
+    flex-direction: column;
+  }
+  .grafikon {
+    width: 95%;
+  }
+}
+
+/* Users */
+.header {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.insert-user {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.insert-user h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.insert-form {
+  width: 50%;
+  padding: 2rem;
+  background: rgba(8, 11, 179, 0.918);
+  color: rgb(233, 232, 240);
+  border-radius: 20px;
+  box-shadow: 0px 0px 13px 1px black;
+  /* transform: rotateX(90deg); */
+  transition: ease 1s;
+}
+.insert-form form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.insert-form :is(input, label, select, button) {
+  width: 50%;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  color: hsl(0, 0%, 4%);
+}
+.insert-form label {
+  margin: 0;
+  color: rgb(233, 232, 240);
+}
+.insert-form button {
+  margin-top: 1rem;
+}
+.insert-form button:hover {
+  cursor: pointer;
+  background: rgb(233, 232, 240);
+  box-shadow: 0px 0px 13px 1px black;
+}

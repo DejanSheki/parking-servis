@@ -1,0 +1,22 @@
+[01,055,001,002,003,004,122,0456,125,0789,012345678901234567890F,21,1,12345] 
+[ ] = pocetak i kraj paketa, 
+01 = vrsta paketa, 99,98,97 = prvi paketi na paljenju elektronike, 
+055 = adresa (broj) lokacije bandere, 
+001,002,003,004 = sta trenutno prikazuju displeji 1,2,3,4 na banderi, ako 
+  displeji imaju neki problem brojevi su -07,-08,-09, 
+122 = temperatura u elektronici = 22 st, ako je minus onda je 011 = -11st 
+0456 = osvetljenje u okruzenju bandere, 
+125 = temperatura na akumulatoru, 
+0789 = napon akumulatora od cega je svaka jedinica 15mV = 789x15mV = 11385mV = 11,38V  
+012345678901234567890F = ICCID broj sim kartice, 
+21 = jacina signala na anteni, 
+1 = aktivan rele za pozadinsko osvetljenje (0 = iskljucen), 
+12345 = checksum CRC16 
+
+
+// kopiranje WIN to LINUX
+pscp -r D:\Dejan\SDP_Control\02zones.sql root@192.168.0.10:/home/dejan/Desktop/parkingServis/node_express/server
+
+net use \\192.168.72.72\IPC$ /user:ZR20010 ZR20010 copy \\192.168.72.72\c$\newsys\transfer\PLS.008 c:\server01
+mount //192.168.81.81/c$/newsys/transfer/ /home/dejan/Desktop/parkingServis/node_express/server/objekti/bel -o username=ZR20010,password=ZR20010
+
