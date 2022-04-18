@@ -13,12 +13,11 @@ const form = document.querySelector('#insertNewLocation');
 
 const loc = {};
 
-console.log(locationsTable);
 // Obrcemo redosled u stringu(datum 2022-01-01 -> 01.01.2022)
 function reverseString(str) {
     const date = new Date(str).toLocaleDateString('sr');
     const hours = new Date(str).toLocaleTimeString('sr');
-    return `${date} / ${hours}`;
+    return `${date} &nbsp; ${hours}`;
 }
 
 // Svi uredjaji iz baze
@@ -26,7 +25,7 @@ async function fetchData() {
     const data = await fetch("http://192.168.0.10:2021/getAllActiveLocations");
     const dbData = await data.json();
     createTable(dbData);
-    // console.log(data);
+    console.log(dbData);
 }
 function createTable(dbData) {
     dbData.forEach(dat => {
@@ -43,11 +42,17 @@ function createTable(dbData) {
         tr.innerHTML = `
 			<td>${dat.locSname}</td>
 			<td>${dat.locID}</td>
+			<td>${dat.locNumber}</td>
             <td>${dat.locLname}</td>
 			<td>${reverseString(dat.locCreatedTD)}</td>
 			<td>${model()}</td>
+			<td>${reverseString(dat.locLastCommTD)}</td>
+			<td>${dat.locDisp1value}</td>
+			<td>${dat.locDisp2value}</td>
+			<td>${dat.locDisp3value}</td>
+			<td>${dat.locDisp4value}</td>
 			<td>${dat.locDesc}</td>
-            <td style="width: 500px;overflow-x: scroll;display: block;">${dat.locLastPacket}</td>
+            <td style="width: 200px;overflow-x: scroll;display: block;">${dat.locLastPacket}</td>
             <td><button id=${dat.locID}>Delete</button></td>
 		`;
         locationsTable.appendChild(tr);

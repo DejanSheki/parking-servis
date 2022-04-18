@@ -10,11 +10,16 @@
   <body>
     <nav>
       <a href="./dbPodaci">Tabele</a>
-      <a href="./statistika">Statistika</a>
       <a href="./mapa">Mapa</a>
       <a href="./01users">Korisnici</a>
       <a href="./03locations">Uredjaji</a>
-      <a href="./02zones">Objekti</a>
+      <div class="dropdown">
+        <button id="dropdown-btn">Objekti <span class="caret"></span></button>
+        <div class="item-list">
+          <a href="./02zones">Pregled i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
       <div class="user">
         <span id="user"></span>
         <a href="/" id="logout">Logout &#10162;</a>
@@ -75,9 +80,15 @@
           <tr>
             <th>Naziv lokacije</th>
             <th>ID</th>
+            <th>Broj lokacije</th>
             <th>Lokacija</th>
             <th>Datum kreiranja</th>
             <th>Model</th>
+            <th>Zadnje javljanje</th>
+            <th>Displej 1</th>
+            <th>Displej 2</th>
+            <th>Displej 3</th>
+            <th>Displej4</th>
             <th>Napomena</th>
           </tr>
         </thead>
@@ -85,5 +96,6 @@
       </table>
     </div>
   </body>
+  <script src="./main.js"></script>
   <script src="./03locations.js"></script>
 </html>
