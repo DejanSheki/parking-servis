@@ -16,14 +16,6 @@ const connection = mysql.createPool({
     ]
 });
 
-//connection.connect((err) => {
-//    if (err) {
-//        console.log(err.message);
-//    }
-//    console.log('db ' + connection.state);
-//});
-
-
 connection.on('connection', connection => {
     connection.query("SET time_zone='+02:00';", err => {
         if (err) {
@@ -123,11 +115,11 @@ class DbService {
             console.log(error);
         }
     }
-    async getAllDataByZoneShort(zoneShort, zoneShort2, zoneShort3) {
+    async getAllDataByZoneShort(zoneShort, zoneShort2, zoneShort3, zoneShort4) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT zoneFreeNow FROM 02zones WHERE zoneShort IN (?,?,?);";
-                connection.query(query, [zoneShort, zoneShort2, zoneShort3], (err, results) => {
+                const query = "SELECT zoneFreeNow, zoneShort FROM 02zones WHERE zoneShort IN (?,?,?,?);";
+                connection.query(query, [zoneShort, zoneShort2, zoneShort3, zoneShort4], (err, results) => {
                     if (err) reject(new Error(err.message));
                     resolve(results);
                 })
@@ -137,6 +129,22 @@ class DbService {
             console.log(error);
         }
     }
+    async getLocationsDataByID(locID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 03locations WHERE locID = ?;";
+                connection.query(query, [locID], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+            // console.log(response);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async insertNewUser(userName, userPassw, userFLname, userRank, userTitle, userMail, userInfoType, userInfoTime, userCreatedByID) {
         try {
             const insertUser = await new Promise((resolve, reject) => {
@@ -196,25 +204,12 @@ class DbService {
                     resolve(result);
                 })
             });
+            // console.log(insertZone);
             return insertZone;
         } catch (error) {
             console.log(error);
         }
     }
-    // async insertBoardData(vrstaPaketa, brLokacije, displej1, displej2, displej3, displej4, temperaturaEl, osvetljenjeUokruzenju, temperaturaAku, naponAku, ICCIDbr, signalAntene, relejPozOsvetljenja, checksum) {
-    //     try {
-    //         const insertData = await new Promise((resolve, reject) => {
-    //             const query = "INSERT INTO tabla (vrstaPaketa, brLokacije, displej1, displej2, displej3, displej4, temperaturaEl, osvetljenjeUokruzenju, temperaturaAku, naponAku, ICCIDbr, signalAntene, relejPozOsvetljenja, checksum) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    //             connection.query(query, [vrstaPaketa, brLokacije, displej1, displej2, displej3, displej4, temperaturaEl, osvetljenjeUokruzenju, temperaturaAku, naponAku, ICCIDbr, signalAntene, relejPozOsvetljenja, checksum], (err, result) => {
-    //                 if (err) reject(new Error(err.message));
-    //                 resolve(result.insertData);
-    //             })
-    //         });
-    //         // return resolve;
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
     async updateUserById(userActive, userID) {
         try {
             userID = parseInt(userID, 10);
@@ -248,16 +243,32 @@ class DbService {
             return false;
         }
     }
-    async updateLocatiOnLastPacket(lastPacket, locNumber) {
-        console.log(lastPacket);
+    async updateLocatiOnLastPacket(lastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "UPDATE 03locations SET locLastPacket = ?, locLastCommTD = CURRENT_TIMESTAMP WHERE locNumber = ?";
-                connection.query(query, [lastPacket, locNumber], (err, result) => {
+                const query = "UPDATE 03locations SET locLastPacket = ?, locDisp1value = ?, locDisp2value =?, locDisp3value = ?, locDisp4value = ?, locLastCommTD = CURRENT_TIMESTAMP WHERE locNumber = ?";
+                connection.query(query, [lastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
                 })
             });
+            // console.log(response);
+            return response === 1 ? true : false;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async editLocation(locType, locNumber, locSname, locLname, locDesc, locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locLat, locLong, locActive, locCreatedByID, locCreatedTD, locDisable, locDisabledByID, locDisableDesc, locEventMask, locLastCommTD, locLastPacket, locColor, locCommInfo, locID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE 03locations SET locType = ?, locNumber = ?, locSname = ?, locLname = ?, locDesc = ?, locDisp1zoneID = ?, locDisp2zoneID = ?, locDisp3zoneID = ?, locDisp4zoneID = ?, locDisp1value = ?, locDisp2value = ?, locDisp3value = ?, locDisp4value = ?, locLat = ?, locLong = ?, locActive = ?, locCreatedByID = ?, locCreatedTD = ?, locDisable = ?, locDisabledByID = ?, locDisableDesc = ?, locEventMask = ?, locLastCommTD = ?, locLastPacket = ?, locColor = ?, locCommInfo = ? WHERE locID = ?";
+                connection.query(query, [locType, locNumber, locSname, locLname, locDesc, locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locLat, locLong, locActive, locCreatedByID, locCreatedTD, locDisable, locDisabledByID, locDisableDesc, locEventMask, locLastCommTD, locLastPacket, locColor, locCommInfo, locID], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            // console.log(response);
             return response === 1 ? true : false;
         } catch (error) {
             console.log(error);
@@ -294,6 +305,34 @@ class DbService {
     //         console.log(error);
     //     }
     // }
+    async insertFreeNowDataStatistic(zoneShort, zoneMaxFree, zoneFreeNow) {
+        try {
+            const insertZone = await new Promise((resolve, reject) => {
+                const query = "INSERT INTO zonefree (zoneShort, zoneMaxFree, zoneFreeNow, zoneDT) VALUES (?,?,?, CURRENT_TIMESTAMP)";
+                connection.query(query, [zoneShort, zoneMaxFree, zoneFreeNow], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result.protocol41);
+                })
+            });
+            return insertZone;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async getFreeNowDataStatistic() {
+        try {
+            const getStatisticFreeNow = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM zonefree;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return getStatisticFreeNow;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 module.exports = DbService;
