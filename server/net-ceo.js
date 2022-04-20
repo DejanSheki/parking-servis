@@ -9,8 +9,7 @@ const fs = require('fs');
 const server = net.createServer((socket) => {
     console.log(`${Date()} Client connected.. ${socket.remoteAddress} : ${socket.remotePort}`);
     socket.on('data', (data) => {
-        podaciSaTable = [data.toString()];
-        // console.log(podaciSaTable);
+        podaciSaTable = [data.toString()]; // Ceo paket string
         let tabla = podaciSaTable[0].split(','); //radi na serveru, sada i kod mene
         // let tabla = JSON.parse(podaciSaTable).split(','); //radi kod mene
         let objTabla = {
@@ -50,9 +49,9 @@ const server = net.createServer((socket) => {
         }
         // console.log(objTabla);
         const db = dbService.getDbServiceInstance();
-        const result1 = db.updateLocatiOnLastPacket(podaciSaTable[0], objTabla.adresa);
+        const result1 = db.updateLocatiOnLastPacket(podaciSaTable[0], objTabla.displej1, objTabla.displej2, objTabla.displej3, objTabla.displej4, objTabla.adresa);
         result1
-            .then(data => console.log(data))
+            .then(data => console.log('Last packet update: ' + data))
             .catch(err => console.log(err));
 
         const crcData = CRC.ToCRC16(`${objTabla.vrstaPaketa},${objTabla.adresa},${objTabla.displej1},${objTabla.displej2},${objTabla.displej3},${objTabla.displej4},${objTabla.osvetljenje},${objTabla.accuNapon},${objTabla.accuTemp},${objTabla.in220},${objTabla.inBack1},${objTabla.inBack2},${objTabla.inBack3},${objTabla.inBack4},${objTabla.osvetljenjeHi},${objTabla.osvetljenjeLo},${objTabla.accuCutOff},${objTabla.offTimeSec},${objTabla.rele220v},${objTabla.releAccu},${objTabla.releOff},${objTabla.testTimerSec},${objTabla.test},${objTabla.pow},${objTabla.rst},${objTabla.pck},${objTabla.ses},${objTabla.cid},${objTabla.iPa},${objTabla.rev},${objTabla.ver},${objTabla.sgn},`);
@@ -62,60 +61,43 @@ const server = net.createServer((socket) => {
         if (objTabla.checksum === crcData) {
             if (objTabla.adresa === '001') {
                 const db = dbService.getDbServiceInstance();
-                const dbResult = db.getAllDataByZoneShort('vma', 'ada', 'cvp');
+                const dbResult = db.getAllDataByZoneShort('mas', 'pio', 'zel', 'obi');
                 dbResult
                     .then(data => {
-                        console.log(data);
-                        data.forEach(element => {
-                            console.log(element.zoneFreeNow);
-                        });
-                    })
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mas', 'pio', 'zel', 'obi');
-                result
-                    .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Obi');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        // console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '002') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('obi', 'dg');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'dg');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        console.log(data);
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Dg');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -124,10 +106,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -136,20 +116,17 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '003') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('mk', 'dg', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mk', 'dg', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Obi');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -157,10 +134,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -169,18 +144,16 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '004') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('mgm', 'mk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mgm', 'mk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mgm');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mk');
                         let objSlanje = {
                             displej1: '0',
-                            displej2: slMestaDisplej1,
-                            displej3: slMestaDisplej2,
+                            displej2: displej1.zoneFreeNow,
+                            displej3: displej2.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -188,10 +161,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -200,17 +171,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '005') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('dg', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -219,10 +188,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -231,17 +198,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '006') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('dg', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -250,10 +215,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -262,20 +225,17 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '007') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('obi', 'pio', 'mk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'pio', 'mk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mk');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -283,10 +243,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -295,17 +253,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '008') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('bba', 'pio');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('bba', 'pio');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'BBa');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -314,10 +270,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -326,20 +280,17 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '009') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('vuk', 'pio', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('vuk', 'pio', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Obi');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -347,10 +298,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -359,17 +308,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '010') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('sla', 'mas');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('sla', 'mas');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -378,10 +325,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -389,18 +334,45 @@ const server = net.createServer((socket) => {
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
-            } else if (objTabla.adresa === '011' || objTabla.adresa === '012') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('pio', 'mas');
-                result
+            } else if (objTabla.adresa === '011') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'vuk', 'vis', 'BV');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vis');
+                        const displej4 = data.find(dat => dat.zoneShort === 'BV');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '012') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pio', 'mas');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -409,10 +381,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -421,14 +391,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '013') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('sla');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('sla');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Sla');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -438,10 +407,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -450,52 +417,44 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '015') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('sla', 'pio', 'mas', 'zel');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('sla', 'pio', 'mas', 'zel');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Zel');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '016') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('mas', 'zel');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'zel');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -504,10 +463,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -516,17 +473,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '017') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('mas', 'vuk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'vuk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Vuk');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -535,10 +490,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -547,14 +500,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '018') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('bba');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('bba');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'BBa');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -564,10 +516,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -576,52 +526,44 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '019') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mgm', 'sla', 'dg', 'kam');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mgm', 'sla', 'dg', 'kam');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mgm');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Kam');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '020') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('mk', 'mgm');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mk', 'mgm');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mgm');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -630,10 +572,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -642,14 +582,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '021' || objTabla.adresa === '022') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('cvp');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('cvp');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'CvP');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -659,10 +598,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -671,14 +608,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '024') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('drak');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('drak');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Drak');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -688,10 +624,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -700,55 +634,46 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '025') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('sla', 'pio', 'mas', 'zel');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('sla', 'pio', 'mas', 'zel');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Zel');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '026') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('pio', 'mas', 'vuk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pio', 'mas', 'vuk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vuk');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -756,10 +681,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -768,17 +691,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '027') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('dg', 'mgm');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'mgm');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mgm');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -787,10 +708,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -799,17 +718,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '028') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('mas', 'sla');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'sla');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Sla');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -818,10 +735,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -830,49 +745,42 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '029') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('obi', 'zel', 'dg', 'kam');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'zel', 'dg', 'kam');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Kam');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '030') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('scn');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('scn');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Scn');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -882,10 +790,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -894,20 +800,17 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '032' || objTabla.adresa === '033' || objTabla.adresa === '034') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('vuk', 'bv', 'vis');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('vuk', 'bv', 'vis');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'BV');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vis');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -915,10 +818,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -927,17 +828,15 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '035' || objTabla.adresa === '036') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces2('vis', 'bv');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('vis', 'bv');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Vis');
+                        const displej2 = data.find(dat => dat.zoneShort === 'BV');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
                             displej3: '0',
                             displej4: '0',
                             osvetljenjeHi: '0700',
@@ -946,10 +845,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -958,195 +855,162 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '037') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mas', 'kam', 'drak', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'kam', 'drak', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Drak');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Obi');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '040') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mgm', 'mk', 'pio', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mgm', 'mk', 'pio', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mgm');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Obi');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '041') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('obi', 'mas', 'vuk', 'bba');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'mas', 'vuk', 'bba');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej4 = data.find(dat => dat.zoneShort === 'BBa');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '042') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('bba', 'vuk', 'sla', 'mas');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('bba', 'vuk', 'sla', 'mas');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'BBa');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mas');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '043') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('pol', 'pio', 'obi', 'mk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pol', 'pio', 'obi', 'mk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pol');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mk');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '044') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('dg', 'obi', 'pol');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'obi', 'pol');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Pol');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -1154,10 +1018,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -1166,14 +1028,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '045' || objTabla.adresa === '046' || objTabla.adresa === '047') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('cuk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('cuk');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Cuk');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -1183,10 +1044,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -1195,189 +1054,158 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '048') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('kam', 'dg', 'drak', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('kam', 'dg', 'drak', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Drak');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Obi');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '049') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('pio', 'zel', 'mk', 'obi');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pio', 'zel', 'mk', 'obi');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Obi');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '050') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('dg', 'mk', 'kam', 'mgm');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'mk', 'kam', 'mgm');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mgm');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '051') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mas', 'bv', 'sla', 'vuk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mas', 'bv', 'sla', 'vuk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej2 = data.find(dat => dat.zoneShort === 'BV');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Vuk');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '052') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('drak', 'zel', 'kam', 'mas');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('drak', 'zel', 'kam', 'mas');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Drak');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mas');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '053' || objTabla.adresa === '054' || objTabla.adresa === '055') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('vma');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('vma');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'VMA');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -1387,10 +1215,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -1399,14 +1225,13 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '056' || objTabla.adresa === '057' || objTabla.adresa === '058') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces1('onbg');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('onbg');
+                dbResult
                     .then(data => {
-                        const slMesta = data.split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'ONBG');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
+                            displej1: displej1.zoneFreeNow,
                             displej2: '0',
                             displej3: '0',
                             displej4: '0',
@@ -1416,10 +1241,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -1428,160 +1251,133 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '059') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('obi', 'mk', 'zel', 'mgm');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'mk', 'zel', 'mgm');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mgm');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '060') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('dg', 'obi', 'mk', 'mgm');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'obi', 'mk', 'mgm');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mgm');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '061') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('obi', 'mas', 'pio', 'bv');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'mas', 'pio', 'bv');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej4 = data.find(dat => dat.zoneShort === 'BV');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '062') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces4('mk', 'obi', 'sla', 'mas');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('mk', 'obi', 'sla', 'mas');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[2].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta4 = data[3].split('Y');
-                        const slMestaDisplej4 = slMesta4[1] + slMesta4[2] + slMesta4[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mas');
+                        console.log(data);
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
-                            displej4: slMestaDisplej4,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
                             accuCutOff: '0500',
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
-                        console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '063') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('obi', 'mas', 'vuk');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'mas', 'vuk');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vuk');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -1589,10 +1385,8 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
@@ -1601,20 +1395,17 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else if (objTabla.adresa === '065') {
-                const file = fileService.getFileServiceInstance();
-                const result = file.emptyParkingSpaces3('kam', 'zel', 'mas');
-                result
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('kam', 'zel', 'mas');
+                dbResult
                     .then(data => {
-                        const slMesta = data[0].split('Y');
-                        const slMestaDisplej1 = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta2 = data[1].split('Y');
-                        const slMestaDisplej2 = slMesta2[1] + slMesta2[2] + slMesta2[3].replace(/(\r\n|\n|\r)/gm, "");
-                        const slMesta3 = data[1].split('Y');
-                        const slMestaDisplej3 = slMesta3[1] + slMesta3[2] + slMesta3[3].replace(/(\r\n|\n|\r)/gm, "");
+                        const displej1 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mas');
                         let objSlanje = {
-                            displej1: slMestaDisplej1,
-                            displej2: slMestaDisplej2,
-                            displej3: slMestaDisplej3,
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
                             displej4: '0',
                             osvetljenjeHi: '0700',
                             osvetljenjeLo: '0600',
@@ -1622,12 +1413,403 @@ const server = net.createServer((socket) => {
                             testTimerSec: '0000',
                             test: '0',
                         }
-                        // console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
                             checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
-                            // checksum: crcData
                         });
                         console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '066') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('dg', 'mk', 'scn', 'mgm');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Dg');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Scn');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mgm');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '068') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('Vis', 'BV', 'Vuk');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Vis');
+                        const displej2 = data.find(dat => dat.zoneShort === 'BV');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vuk');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '069') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('sla', 'zel', 'kam', 'drak');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Drak');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '070') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('drak', 'Sla', 'Vuk');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Drak');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Vuk');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '071') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('kam', 'mas', 'drak');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Kam');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Drak');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '072' || objTabla.adresa === '073') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('cvp');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'CvP');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: '0',
+                            displej3: '0',
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '074') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pio', 'vuk', 'mas', 'mgm');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Mas');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mgm');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '075') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('vuk', 'sla', 'pio', 'mas');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Vuk');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Sla');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mas');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '076') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('pio', 'mas');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Mas');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: '0',
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '077') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'zel', 'scn', 'bel');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Scn');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Bel');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '078') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('bel');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Bel');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: '0',
+                            displej3: '0',
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '079') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('scn', 'bel');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Scn');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Bel');
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: '0',
+                            displej4: '0',
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        console.log(objSlanjeCheck);
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '080') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('zel', 'obi', 'scn', 'bel');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Scn');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Bel');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
+                        socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        socket.end();
+                        socket.destroy();
+                    })
+                    .catch(err => console.log(err));
+            } else if (objTabla.adresa === '081' || objTabla.adresa === '082') {
+                const db = dbService.getDbServiceInstance();
+                const dbResult = db.getAllDataByZoneShort('obi', 'zel', 'pio', 'mas');
+                dbResult
+                    .then(data => {
+                        const displej1 = data.find(dat => dat.zoneShort === 'Obi');
+                        const displej2 = data.find(dat => dat.zoneShort === 'Zel');
+                        const displej3 = data.find(dat => dat.zoneShort === 'Pio');
+                        const displej4 = data.find(dat => dat.zoneShort === 'Mas');
+                        console.log(data);
+                        let objSlanje = {
+                            displej1: displej1.zoneFreeNow,
+                            displej2: displej2.zoneFreeNow,
+                            displej3: displej3.zoneFreeNow,
+                            displej4: displej4.zoneFreeNow,
+                            osvetljenjeHi: '0700',
+                            osvetljenjeLo: '0600',
+                            accuCutOff: '0500',
+                            testTimerSec: '0000',
+                            test: '0',
+                        }
+                        const objSlanjeCheck = Object.assign(objSlanje, {
+                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                        });
                         socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                         socket.end();
                         socket.destroy();

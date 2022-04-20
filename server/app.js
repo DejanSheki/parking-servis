@@ -61,6 +61,19 @@ app.get('/getAllActiveLocations', (request, response) => {
     result.then(data => response.json(data))
         .catch(err => console.log(err));
 });
+app.get('/getFreeNowDataStatistic', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    const result = db.getFreeNowDataStatistic();
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
+app.patch('/getLocationsDataByID', (request, response) => {
+    const locID = request.body;
+    const db = dbService.getDbServiceInstance();
+    const result = db.getLocationsDataByID(locID.locID);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
 // create 
 app.post('/insertNewUser', (request, response) => {
     const user = request.body;
@@ -81,7 +94,6 @@ app.post('/insertNewLocation', (request, response) => {
 });
 app.post('/insertNewZone', (request, response) => {
     const zone = request.body;
-    console.log(zone);
     const db = dbService.getDbServiceInstance();
     const result = db.insertNewZone(zone.zoneNumber, zone.zoneName, zone.zoneShort, zone.zoneLat, zone.zoneLong, zone.zoneMaxFree, zone.zoneCreatedByID);
     result
@@ -126,15 +138,23 @@ app.patch('/deleteUser', (request, response) => {
 });
 app.patch('/deleteLocation', (request, response) => {
     const { locActive, locID } = request.body;
-    console.log(request.body);
     const db = dbService.getDbServiceInstance();
     const result = db.updateLocationById(locActive, locID);
     result
         .then(data => response.json({ success: data }))
         .catch(err => console.log(err));
 });
+app.patch('/editLocation', (request, response) => {
+    const location = request.body;
+    // console.log(location.locDisabledTD.replace(/['"]+/g, ''));
+    const db = dbService.getDbServiceInstance();
+    const result = db.editLocation(location.locType, location.locNumber, location.locSname, location.locLname, location.locDesc, location.locDisp1zoneID, location.locDisp2zoneID, location.locDisp3zoneID, location.locDisp4zoneID, location.locDisp1value, location.locDisp2value, location.locDisp3value, location.locDisp4value, location.locLat, location.locLong, location.locActive, location.locCreatedByID, location.locCreatedTD, location.locDisable, location.locDisabledByID, location.locDisableDesc, location.locEventMask, location.locLastCommTD, location.locLastPacket, location.locColor, location.locCommInfo, location.locID);
+    result
+        .then(data => response.json({ success: data }))
+        .catch(err => console.log(err));
+});
 
-// table
+// zone data
 app.get('/vuk', (request, response) => {
     const db = dbService.getDbServiceInstance();
     const result = db.getZoneData('vuk');
