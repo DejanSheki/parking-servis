@@ -1,8 +1,12 @@
 const locationsTable = document.querySelector('#locations-table');
 const user = document.querySelector('#user');
 user.innerHTML = sessionStorage.loggedUser;
+const locationAdd = document.querySelector('#locationAdd');
+const insertLocation = document.querySelector('.insert-location');
 
+const editContainer = document.querySelector('.edit-container');
 const editInput = document.querySelector('#editInput');
+const closeBtn = document.querySelector('#close');
 
 const locSname = document.querySelector('#locSname');
 const locLname = document.querySelector('#locLname');
@@ -12,14 +16,48 @@ const locDesc = document.querySelector('#locDesc');
 const locLat = document.querySelector('#locLat');
 const locLong = document.querySelector('#locLong');
 const form = document.querySelector('#insertNewLocation');
-
 const loc = {};
+
+let locModel = '';
+const model = (dat) => {
+    if (dat.locType === 1) {
+        return locModel = 'P-INFO';
+    }
+    if (dat.locType === 2) {
+        return locModel = 'SENSIT';
+    }
+}
+let disabledEnabled = '';
+const disEnb = (dat) => {
+    if (dat.locDisable === 0) {
+        return disabledEnabled = 'Radi';
+    }
+    if (dat.locDisable === 1) {
+        return disabledEnabled = 'Isključena';
+    }
+}
+const eventMask = (dat) => {
+    if (dat.locEventMask === 0) {
+        return '&#x2713;';
+    }
+    if (dat.locEventMask === 1) {
+        return '&#45;';
+    }
+}
+
+// Dodaj lokaciju
+locationAdd.addEventListener('click', () => {
+    insertLocation.classList.add('edit-container-show');
+});
+closeBtn.addEventListener('click', () => {
+    insertLocation.classList.remove('edit-container-show');
+});
 
 // Obrcemo redosled u stringu(datum 2022-01-01 -> 01.01.2022)
 function reverseString(str) {
     const date = new Date(str).toLocaleDateString('sr');
     const hours = new Date(str).toLocaleTimeString('sr');
-    return `${date} &nbsp; ${hours}`;
+    return `${date} ${hours}`;
 }
 
 // Svi uredjaji iz baze
@@ -27,37 +65,24 @@ async function fetchData() {
     const data = await fetch("http://192.168.0.10:2021/getAllActiveLocations");
     const dbData = await data.json();
     createTable(dbData);
-    console.log(dbData);
 }
 
 function createTable(dbData) {
     dbData.forEach(dat => {
         let tr = document.createElement('tr');
-        let locModel = '';
-        let model = () => {
-            if (dat.locType === 1) {
-                return locModel = 'P-INFO';
-            }
-            if (dat.locType === 0) {
-                return locModel = 'SENSIT';
-            }
-        }
         tr.innerHTML = `
+            <td>${model(dat)}</td>
 			<td>${dat.locSname}</td>
-			<td>${dat.locID}</td>
-			<td>${dat.locNumber}</td>
+            <td>${dat.locNumber}</td>
             <td>${dat.locLname}</td>
-			<td>${reverseString(dat.locCreatedTD)}</td>
-			<td>${model()}</td>
 			<td>${reverseString(dat.locLastCommTD)}</td>
 			<td>${dat.locDisp1value}</td>
 			<td>${dat.locDisp2value}</td>
 			<td>${dat.locDisp3value}</td>
 			<td>${dat.locDisp4value}</td>
-			<td>${dat.locDesc}</td>
-            <td style="width: 200px;overflow-x: scroll;display: block;">${dat.locLastPacket}</td>
-            <td><button class='editBtn' id=${dat.locID}>Edit</button></td>
-            <td><button class='deleteBtn' id=${dat.locID}>Delete</button></td>
+            <td >${dat.locLastPacket}</td>
+            <td><button class='editBtn' id=${dat.locID}>Izmeni</button></td>
+            <td><button class='deleteBtn' id=${dat.locID}>Obriši</button></td>
 		`;
         locationsTable.appendChild(tr);
     });
@@ -90,11 +115,39 @@ function createTable(dbData) {
             })
         }
         btn.addEventListener('click', (e) => {
-            fetch(`http://192.168.0.10:2021/getLocationsDataByID`, options)
-                .then(data => data.json())
-                .then(dbData => {
-                    console.log(dbData);
-                    createEditInput(dbData)
+            Promise.all([
+                fetch(`http://192.168.0.10:2021/getLocationsDataByID`, options)
+                    .then(data => data.json()),
+                fetch(`http://192.168.0.10:2021/getAllUsers`)
+                    .then(data => data.json()),
+                fetch(`http://192.168.0.10:2021/getAllActiveZonesData`)
+                    .then(data => data.json())
+            ])
+                .then((dbData) => {
+                    const { locCreatedByID, locDisabledByID, locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID } = dbData[0][0];
+                    const { userFLname } = dbData[1].find(e => e.userID === locCreatedByID);
+                    // const zoneShort = dbData[2].filter(e => e.zoneID === locDisp1zoneID);
+                    const displayData = {};
+                    dbData[2].forEach(db => {
+                        if (db.zoneID === locDisp1zoneID) {
+                            displayData.d1 = db.zoneName;
+                        } else if (db.zoneID === locDisp2zoneID) {
+                            displayData.d2 = db.zoneName;
+                        } else if (db.zoneID === locDisp3zoneID) {
+                            displayData.d3 = db.zoneName;
+                        } else if (db.zoneID === locDisp4zoneID) {
+                            displayData.d4 = db.zoneName;
+                        }
+                    })
+                    const userName = () => {
+                        if (dbData[1].find(e => e.userID === locDisabledByID) !== undefined) {
+                            return dbData[1].find(e => e.userID === locDisabledByID);
+                        } else {
+                            return 0;
+                        }
+                    }
+                    const disabledByName = userName();
+                    createEditInput(dbData, userFLname, disabledByName, displayData);
                 })
         });
     });
@@ -122,16 +175,21 @@ form.addEventListener('submit', (e) => {
     form.reset();
     locationsTable.innerHTML = '';
     fetchData();
+    insertLocation.classList.remove('edit-container-show');
 });
 
-
-function createEditInput(dbData) {
-    dbData.forEach(dat => {
+function createEditInput(dbData, userFLname, disabledByName, displayData) {
+    editContainer.classList.add('edit-container-show');
+    dbData[0].forEach(dat => {
         editInput.innerHTML = `
         <label for="locID">ID: </label>
-        <input type="text" name="locID" value="${dat.locID}" required />
+        <input type="text" name="locID" value="${dat.locID}" readonly />
         <label for="locType">Model: </label>
-        <input type="text" name="locType" value="${dat.locType}" required />
+        <select name="locType" id="locType">
+            <option value="${dat.locType}" selected>${model(dat)}</option>
+            <option value="1">P-INFO</option>
+            <option value="2">SENSIT</option>
+        </select>
         <label for="locNumber">Broj lokacije: </label>
         <input type="text" name="locNumber" value="${dat.locNumber}" required />
         <label for="locSname">Oznaka: </label>
@@ -140,53 +198,147 @@ function createEditInput(dbData) {
         <input type="text" name="locLname" value="${dat.locLname}" required />
         <label for="locDesc">Opis: </label>
         <input type="text" name="locDesc" value="${dat.locDesc}" required />
-        <label for="locDisp1zoneID">Displej 1 ID objekta: </label>
-        <input type="text" name="locDisp1zoneID" value="${dat.locDisp1zoneID}" required />
-        <label for="locDisp2zoneID">Displej 2 ID objekta: </label>
-        <input type="text" name="locDisp2zoneID" value="${dat.locDisp2zoneID}" required />
-        <label for="locDisp3zoneID">Displej 3 ID objekta: </label>
-        <input type="text" name="locDisp3zoneID" value="${dat.locDisp3zoneID}" required />
-        <label for="locDisp4zoneID">Displej 4 ID objekta: </label>
-        <input type="text" name="locDisp4zoneID" value="${dat.locDisp4zoneID}" required />
-        <label for="locDisp1value">Displej 1: </label>
-        <input type="text" name="locDisp1value" value="${dat.locDisp1value}" required />
-        <label for="locDisp2value">Displej 2: </label>
-        <input type="text" name="locDisp2value" value="${dat.locDisp2value}" required />
-        <label for="locDisp3value">Displej 3: </label>
-        <input type="text" name="locDisp3value" value="${dat.locDisp3value}" required />
-        <label for="locDisp4value">Displej 4: </label>
-        <input type="text" name="locDisp4value" value="${dat.locDisp4value}" required />
+        <label for="locDisp1zoneID">Displej 1: </label>
+        <select name="locDisp1zoneID" id="locDisp1zoneID">
+            <option value="${dat.locDisp1zoneID}" selected>${displayData.d1}</option>
+            <option value="1">Vukov spomenik</option>
+            <option value="2">Slavija</option>
+            <option value="3">MGM</option>
+            <option value="4">Cvetkova pijaca</option>
+            <option value="5">Mali Kalemegdan</option>
+            <option value="6">Donji grad</option>
+            <option value="7">Politika</option>
+            <option value="8">Kamenička</option>
+            <option value="9">Viška</option>
+            <option value="10">Čukarica</option>
+            <option value="11">Baba Višnjina</option>
+            <option value="12">Botanička bašta</option>
+            <option value="13">Opština Novi Beograd</option>
+            <option value="14">VMA</option>
+            <option value="15">Obilićev venac</option>
+            <option value="16">Zeleni venac</option>
+            <option value="17">Masarikova</option>
+            <option value="18">Pionirski park</option>
+            <option value="19">Dr Aleksandra Kostića</option>
+            <option value="20">Sava Centar</option>
+            <option value="21">Belvil</option>
+            <option value="22">Ada ciganlija</option>
+            <option value="23">Kapetanija</option>
+            <option value="24">Železnička stanica NBG</option>
+        </select>
+        <label for="locDisp2zoneID">Displej 2: </label>
+        <select name="locDisp1zoneID" id="locDisp1zoneID">
+        <option value="${dat.locDisp2zoneID}" selected>${displayData.d2}</option>
+        <option value="1">Vukov spomenik</option>
+        <option value="2">Slavija</option>
+        <option value="3">MGM</option>
+        <option value="4">Cvetkova pijaca</option>
+        <option value="5">Mali Kalemegdan</option>
+        <option value="6">Donji grad</option>
+        <option value="7">Politika</option>
+        <option value="8">Kamenička</option>
+        <option value="9">Viška</option>
+        <option value="10">Čukarica</option>
+        <option value="11">Baba Višnjina</option>
+        <option value="12">Botanička bašta</option>
+        <option value="13">Opština Novi Beograd</option>
+        <option value="14">VMA</option>
+        <option value="15">Obilićev venac</option>
+        <option value="16">Zeleni venac</option>
+        <option value="17">Masarikova</option>
+        <option value="18">Pionirski park</option>
+        <option value="19">Dr Aleksandra Kostića</option>
+        <option value="20">Sava Centar</option>
+        <option value="21">Belvil</option>
+        <option value="22">Ada ciganlija</option>
+        <option value="23">Kapetanija</option>
+        <option value="24">Železnička stanica NBG</option>
+    </select>
+        <label for="locDisp3zoneID">Displej 3: </label>
+        <select name="locDisp1zoneID" id="locDisp1zoneID">
+        <option value="${dat.locDisp3zoneID}" selected>${displayData.d3}</option>
+        <option value="1">Vukov spomenik</option>
+        <option value="2">Slavija</option>
+        <option value="3">MGM</option>
+        <option value="4">Cvetkova pijaca</option>
+        <option value="5">Mali Kalemegdan</option>
+        <option value="6">Donji grad</option>
+        <option value="7">Politika</option>
+        <option value="8">Kamenička</option>
+        <option value="9">Viška</option>
+        <option value="10">Čukarica</option>
+        <option value="11">Baba Višnjina</option>
+        <option value="12">Botanička bašta</option>
+        <option value="13">Opština Novi Beograd</option>
+        <option value="14">VMA</option>
+        <option value="15">Obilićev venac</option>
+        <option value="16">Zeleni venac</option>
+        <option value="17">Masarikova</option>
+        <option value="18">Pionirski park</option>
+        <option value="19">Dr Aleksandra Kostića</option>
+        <option value="20">Sava Centar</option>
+        <option value="21">Belvil</option>
+        <option value="22">Ada ciganlija</option>
+        <option value="23">Kapetanija</option>
+        <option value="24">Železnička stanica NBG</option>
+    </select>
+        <label for="locDisp4zoneID">Displej 4: </label>
+        <select name="locDisp1zoneID" id="locDisp1zoneID">
+        <option value="${dat.locDisp4zoneID}" selected>${displayData.d4}</option>
+        <option value="1">Vukov spomenik</option>
+        <option value="2">Slavija</option>
+        <option value="3">MGM</option>
+        <option value="4">Cvetkova pijaca</option>
+        <option value="5">Mali Kalemegdan</option>
+        <option value="6">Donji grad</option>
+        <option value="7">Politika</option>
+        <option value="8">Kamenička</option>
+        <option value="9">Viška</option>
+        <option value="10">Čukarica</option>
+        <option value="11">Baba Višnjina</option>
+        <option value="12">Botanička bašta</option>
+        <option value="13">Opština Novi Beograd</option>
+        <option value="14">VMA</option>
+        <option value="15">Obilićev venac</option>
+        <option value="16">Zeleni venac</option>
+        <option value="17">Masarikova</option>
+        <option value="18">Pionirski park</option>
+        <option value="19">Dr Aleksandra Kostića</option>
+        <option value="20">Sava Centar</option>
+        <option value="21">Belvil</option>
+        <option value="22">Ada ciganlija</option>
+        <option value="23">Kapetanija</option>
+        <option value="24">Železnička stanica NBG</option>
+    </select>
         <label for="locLat">Latituda: </label>
         <input type="text" name="locLat" value="${dat.locLat}" required />
         <label for="locLong">Longituda: </label>
         <input type="text" name="locLong" value="${dat.locLong}" required />
-        <label for="locActive">Aktivna/Neaktivna: </label>
-        <input type="text" name="locActive" value="${dat.locActive}" required />
-        <label for="locCreatedByID">ID korisnika: </label>
-        <input type="text" name="locCreatedByID" value="${dat.locCreatedByID}" required />
+        <label for="locCreatedByID">Kreirao: </label>
+        <input type="text" name="locCreatedByID" value="${userFLname}" readonly />
         <label for="locCreatedTD">Datum kreiranja: </label>
         <input type="text" name="locCreatedTD" value="${dat.locCreatedTD}" required />
-        <label for="locDisable">Enejblovana/Disejblovana: </label>
-        <input type="text" name="locDisable" value="${dat.locDisable}" required />
-        <label for="locDisabledByID">ID korisnika koji je disejblovao: </label>
-        <input type="text" name="locDisabledByID" value="${dat.locDisabledByID}" required />
-        <label for="locDisabledTD">Vreme disejblovanja: </label>
+        <label for="locDisable">Privremeno isključena: </label>
+        <select name="locDisable">
+            <option value="${dat.locDisable}" selected>${disEnb(dat)}</option>
+            <option value="0">Radi</option>
+            <option value="1">Isključena</option>
+        </select>
+        <label for="locDisabledByID">Isključena od strane: </label>
+        <input type="text" name="locDisabledByID" value="${disabledByName.userName}" placeholder="${disabledByName}" required />
+        <label for="locDisabledTD">Vreme privremenog isključenja: </label>
         <input type="text" name="locDisabledTD" value="${dat.locDisabledTD}" required />
-        <label for="locDisableDesc">Opis disejblovanja: </label>
+        <label for="locDisableDesc">Opis privremenog isključenja: </label>
         <input type="text" name="locDisableDesc" value="${dat.locDisableDesc}" required />
         <label for="locEventMask">Event Mask: </label>
-        <input type="text" name="locEventMask" value="${dat.locEventMask}" required />
-        <label for="locLastCommTD">Poslednje javljanje: </label>
-        <input type="text" name="locLastCommTD" value="${dat.locLastCommTD}" required />
-        <label for="locLastPacket">Poslednji paket: </label>
-        <input type="text" name="locLastPacket" value="${dat.locLastPacket}" required />
-        <label for="locColor">Boja: </label>
-        <input type="text" name="locColor" value="${dat.locColor}" required />
-        <label for="locCommInfo">Boja: </label>
+        <input type="text" name="locEventMask" value="${eventMask(dat)}" placeholder="${dat.locEventMask}" required />
+        <label for="locCommInfo">Dodatni podaci: </label>
         <input type="text" name="locCommInfo" value="${dat.locCommInfo}" required />
-        <button id="editBtnSubmit">Submit</button>
+        <button id="editBtnSubmit">Izmeni</button>
+        <button id="close">Otkaži</button>
 		`;
         const editBtnSubmit = document.querySelector('#editBtnSubmit');
+
         editBtnSubmit.addEventListener('click', (e) => {
             e.preventDefault();
             loc.locID = editInput[0].value;
@@ -199,24 +351,17 @@ function createEditInput(dbData) {
             loc.locDisp2zoneID = editInput[7].value;
             loc.locDisp3zoneID = editInput[8].value;
             loc.locDisp4zoneID = editInput[9].value;
-            loc.locDisp1value = editInput[10].value;
-            loc.locDisp2value = editInput[11].value;
-            loc.locDisp3value = editInput[12].value;
-            loc.locDisp4value = editInput[13].value;
-            loc.locLat = editInput[14].value;
-            loc.locLong = editInput[15].value;
-            loc.locActive = editInput[16].value;
-            loc.locCreatedByID = editInput[17].value;
-            loc.locCreatedTD = editInput[18].value;
-            loc.locDisable = editInput[19].value;
-            loc.locDisabledByID = editInput[20].value;
-            // loc.locDisabledTD = editInput[21].value;
-            loc.locDisableDesc = editInput[22].value;
-            loc.locEventMask = editInput[23].value;
-            loc.locLastCommTD = editInput[24].value;
-            loc.locLastPacket = editInput[25].value;
-            loc.locColor = editInput[26].value;
-            loc.locCommInfo = editInput[27].value;
+            loc.locLat = editInput[10].value;
+            loc.locLong = editInput[11].value;;
+            loc.locCreatedByID = editInput[12].value;
+            loc.locCreatedTD = editInput[13].value;
+            loc.locDisable = editInput[14].value;
+            loc.locDisabledByID = editInput[15].placeholder;
+            loc.locDisabledTD = editInput[16].value;
+            loc.locDisableDesc = editInput[17].value;
+            loc.locEventMask = editInput[18].placeholder;
+            loc.locCommInfo = editInput[19].value;
+            console.log(loc);
             const options = {
                 method: 'PATCH',
                 headers: {
@@ -225,7 +370,7 @@ function createEditInput(dbData) {
                 body: JSON.stringify(loc)
             }
             fetch('http://192.168.0.10:2021/editLocation', options);
-            console.log(loc);
+            editContainer.classList.remove('edit-container-show');
             editInput.innerHTML = '';
             locationsTable.innerHTML = '';
             fetchData();
@@ -237,4 +382,5 @@ function createEditInput(dbData) {
 const interval = setInterval(() => {
     locationsTable.innerHTML = '';
     fetchData();
-}, 20000);
+}, 30000);
+

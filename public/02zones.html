@@ -4,59 +4,74 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zone</title>
+    <title>PE Info</title>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <nav>
-      <a href="./dbPodaci">Tabele</a>
-      <a href="./statistika">Statistika</a>
+      <a href="./dbPodaci">Pregled</a>
       <a href="./mapa">Mapa</a>
       <a href="./01users">Korisnici</a>
-      <a href="./03locations">Uredjaji</a>
-      <a href="./02zones">Objekti</a>
+      <div class="dropdown">
+        <button id="dropdown-btn-locations">
+          Uredjaji <span class="caret"></span>
+        </button>
+        <div class="item-list-locations">
+          <a href="./03locations">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button id="dropdown-btn">Objekti <span class="caret"></span></button>
+        <div class="item-list">
+          <a href="./02zones">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
       <div class="user">
         <span id="user"></span>
-        <a href="/" id="logout">Logout &#10162;</a>
+        <a href="/" id="logout">Odjava &#10162;</a>
       </div>
     </nav>
     <div class="insert-zone">
-      <div class="container">
-        <form id="insertNewZone">
-          <input type="text" id="zoneNumber" placeholder="Broj zone" required />
-          <input type="text" id="zoneName" placeholder="Naziv zone" required />
-          <input
-            type="text"
-            name=""
-            id="zoneShort"
-            placeholder="Oznaka"
-            required
-          />
-          <input
-            type="text"
-            name=""
-            id="zoneLat"
-            placeholder="Latituda"
-            required
-          />
-          <input
-            type="text"
-            name=""
-            id="zoneLong"
-            placeholder="Longituda"
-            required
-          />
-          <input
-            type="text"
-            name=""
-            id="zoneMaxFree"
-            placeholder="Kapacitet"
-            required
-          />
-          <button type="submit" id="submit">Submit</button>
-        </form>
-      </div>
+      <form id="insertNewZone" class="insert-zone-input">
+        <label for="zoneNumber">Broj objekta: </label>
+        <input type="text" id="zoneNumber" name="zoneNumber" required />
+        <label for="zoneName">Naziv objekta: </label>
+        <input type="text" id="zoneName" name="zoneName" required />
+        <label for="zoneShort">Oznaka: </label>
+        <input type="text" name="zoneShort" id="zoneShort" required />
+        <label for="zoneLokacija">Lokacija: </label>
+        <input type="text" name="zoneLokacija" id="zoneLokacija" required />
+        <label for="zoneLat">Latituda: </label>
+        <input type="text" name="zoneLat" id="zoneLat" required />
+        <label for="zoneLong">Longituda: </label>
+        <input type="text" name="zoneLong" id="zoneLong" required />
+        <label for="zoneMaxFree">Kapacitet: </label>
+        <input type="text" name="zoneMaxFree" id="zoneMaxFree" required />
+        <button type="submit" id="submit">Dodaj</button>
+        <button id="close">Otkaži</button>
+      </form>
     </div>
+    <div class="container">
+      <div class="header">
+        <h2>Pregled objekata</h2>
+        <button id="zoneAdd">Dodaj novi objekat</button>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Naziv</th>
+            <th>Oznaka</th>
+            <th>Datum kreiranja</th>
+            <th>Kapacitet</th>
+            <th>Obriši</th>
+          </tr>
+        </thead>
+        <tbody id="zones-table"></tbody>
+      </table>
+    </div>
+    <script src="./main.js"></script>
     <script src="./02zones.js"></script>
   </body>
 </html>
