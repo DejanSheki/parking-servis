@@ -41,6 +41,9 @@ app.get('/03locations', (request, response) => {
 app.get('/02zones', (request, response) => {
     response.sendFile(path.join(__dirname, '../public/02zones.html'));
 });
+app.get('/test', (request, response) => {
+    response.sendFile(path.join(__dirname, '../public/test.html'));
+});
 
 // get db data
 app.get('/getAllActiveUsers', (request, response) => {
@@ -49,9 +52,15 @@ app.get('/getAllActiveUsers', (request, response) => {
     result.then(data => response.json(data))
         .catch(err => console.log(err));
 });
-app.get('/getAllZonesData', (request, response) => {
+app.get('/getAllUsers', (request, response) => {
     const db = dbService.getDbServiceInstance();
-    const result = db.getAllZonesData();
+    const result = db.getAllUsers();
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
+app.get('/getAllActiveZonesData', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    const result = db.getAllActiveZonesData();
     result.then(data => response.json(data))
         .catch(err => console.log(err));
 });
@@ -95,7 +104,7 @@ app.post('/insertNewLocation', (request, response) => {
 app.post('/insertNewZone', (request, response) => {
     const zone = request.body;
     const db = dbService.getDbServiceInstance();
-    const result = db.insertNewZone(zone.zoneNumber, zone.zoneName, zone.zoneShort, zone.zoneLat, zone.zoneLong, zone.zoneMaxFree, zone.zoneCreatedByID);
+    const result = db.insertNewZone(zone.zoneNumber, zone.zoneName, zone.zoneShort, zone.zoneLokacija, zone.zoneLat, zone.zoneLong, zone.zoneMaxFree, zone.zoneCreatedByID);
     result
         .then(data => console.log(data))
         .catch(err => console.log(err));
@@ -107,7 +116,7 @@ app.post('/login', (request, response) => {
     const userPassw = request.body.userPassw;
     if (userName && userPassw) {
         const db = dbService.getDbServiceInstance();
-        const result = db.getUserById(userName, userPassw);
+        const result = db.getUserByNameAndPassword(userName, userPassw);
         result.then(data => {
             if (data.length > 0) {
                 const userData = data[0];
@@ -128,6 +137,16 @@ app.post('/login', (request, response) => {
     }
 });
 // update 
+app.patch('/updateTest', (request, response) => {
+    const { a1, a2, a3, a4, a5, a6, a7, a8, a9 } = request.body;
+    const upTest = `${a1}, ${a2}, ${a3}, ${a4}, ${a5}, ${a6}, ${a7}, ${a8}, ${a9}`;
+    console.log(upTest.replace(/\s/g, '').toString());
+    const db = dbService.getDbServiceInstance();
+    const result = db.updateTest(upTest.replace(/\s/g, '').toString());
+    result
+        .then(data => response.json({ success: data }))
+        .catch(err => console.log(err));
+});
 app.patch('/deleteUser', (request, response) => {
     const { userID, userActive } = request.body;
     const db = dbService.getDbServiceInstance();
@@ -146,9 +165,19 @@ app.patch('/deleteLocation', (request, response) => {
 });
 app.patch('/editLocation', (request, response) => {
     const location = request.body;
+    console.log(location);
     // console.log(location.locDisabledTD.replace(/['"]+/g, ''));
     const db = dbService.getDbServiceInstance();
-    const result = db.editLocation(location.locType, location.locNumber, location.locSname, location.locLname, location.locDesc, location.locDisp1zoneID, location.locDisp2zoneID, location.locDisp3zoneID, location.locDisp4zoneID, location.locDisp1value, location.locDisp2value, location.locDisp3value, location.locDisp4value, location.locLat, location.locLong, location.locActive, location.locCreatedByID, location.locCreatedTD, location.locDisable, location.locDisabledByID, location.locDisableDesc, location.locEventMask, location.locLastCommTD, location.locLastPacket, location.locColor, location.locCommInfo, location.locID);
+    const result = db.editLocation(location.locType, location.locNumber, location.locSname, location.locLname, location.locDesc, location.locDisp1zoneID, location.locDisp2zoneID, location.locDisp3zoneID, location.locDisp4zoneID, location.locLat, location.locLong, location.locCreatedTD, location.locDisable, location.locDisabledByID, location.locDisableDesc, location.locEventMask, location.locCommInfo, location.locID);
+    result
+        .then(data => response.json({ success: data }))
+        .catch(err => console.log(err));
+});
+app.patch('/deleteZone', (request, response) => {
+    const { zoneActive, zoneID } = request.body;
+    console.log(zoneID);
+    const db = dbService.getDbServiceInstance();
+    const result = db.updateZoneById(zoneActive, zoneID);
     result
         .then(data => response.json({ success: data }))
         .catch(err => console.log(err));

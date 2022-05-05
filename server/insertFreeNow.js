@@ -9,14 +9,14 @@ function percentageCalculator(zauzeto, kapacitet) {
 
 // Boja prema broju sl. mesta
 function bgColor(popunjenost) {
-    if (popunjenost >= 90) {
-        return 'rgb(227, 121, 121)';
+    if (popunjenost >= 90 && popunjenost < 100) {
+        return 'rgb(255, 151, 151)';
     } else if (popunjenost > 50 && popunjenost < 90) {
         return 'rgb(247, 247, 136)';
     } else if (popunjenost <= 50) {
         return 'rgb(208, 233, 198)';
     } else if (popunjenost = 100) {
-        return 'rgb(214, 63, 63)';
+        return 'rgb(242, 67, 67)';
     }
 }
 
@@ -36,7 +36,6 @@ const checkLastFreeNow = (zoneShort) => {
 
 async function insertZoneFreeNow(zoneShort) {
     const check = await checkLastFreeNow(zoneShort);
-    console.log(check);
     const file = fileService.getFileServiceInstance();
     const result = file.locations(zoneShort);
     result
@@ -81,20 +80,70 @@ const interval = setInterval(() => {
     insertZoneFreeNow('pol');
     insertZoneFreeNow('kam');
     insertZoneFreeNow('vis');
-    insertZoneFreeNow('cuk');
-    insertZoneFreeNow('bv');
+    // insertZoneFreeNow('cuk');
+    // insertZoneFreeNow('bv');
     insertZoneFreeNow('bba');
-    insertZoneFreeNow('onbg');
+    // insertZoneFreeNow('onbg');
     insertZoneFreeNow('vma');
     insertZoneFreeNow('obi');
     insertZoneFreeNow('zel');
     insertZoneFreeNow('mas');
     insertZoneFreeNow('pio');
-    insertZoneFreeNow('drak');
-    insertZoneFreeNow('scn');
-    insertZoneFreeNow('bel');
+    // insertZoneFreeNow('drak');
+    // insertZoneFreeNow('scn');
+    // insertZoneFreeNow('bel');
     insertZoneFreeNow('ada');
-    insertZoneFreeNow('kap');
-    insertZoneFreeNow('zsnbg');
+    // insertZoneFreeNow('kap');
+    // insertZoneFreeNow('zsnbg');
 }, 30000);
 
+async function insertFreeNowDataStatistic(zoneShort) {
+    const check = await checkLastFreeNow(zoneShort);
+    console.log(check.zoneMaxFree);
+    const file = fileService.getFileServiceInstance();
+    const result = file.locations(zoneShort);
+    result
+        .then(data => {
+            let slMesta = data.split('Y');
+            let freeNow;
+            if (zoneShort === 'ada') {
+                freeNow = slMesta[1] + slMesta[2] + slMesta[3] + slMesta[4].replace(/(\r\n|\n|\r)/gm, "");
+            } else {
+                freeNow = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
+            }
+            const db = dbService.getDbServiceInstance();
+            const result1 = db.insertFreeNowDataStatistic(zoneShort, check.zoneMaxFree, freeNow);
+            result1
+                .then(data => console.log(data))
+                .catch(err => console.log(err))
+        })
+        .catch(err => console.log(err));
+}
+
+
+const intervalStatistics = setInterval(() => {
+    insertFreeNowDataStatistic('vuk');
+    insertFreeNowDataStatistic('sla');
+    insertFreeNowDataStatistic('mgm');
+    insertFreeNowDataStatistic('cvp');
+    insertFreeNowDataStatistic('mk');
+    insertFreeNowDataStatistic('dg');
+    insertFreeNowDataStatistic('pol');
+    insertFreeNowDataStatistic('kam');
+    insertFreeNowDataStatistic('vis');
+    insertFreeNowDataStatistic('cuk');
+    insertFreeNowDataStatistic('bv');
+    insertFreeNowDataStatistic('bba');
+    insertFreeNowDataStatistic('onbg');
+    insertFreeNowDataStatistic('vma');
+    insertFreeNowDataStatistic('obi');
+    insertFreeNowDataStatistic('zel');
+    insertFreeNowDataStatistic('mas');
+    insertFreeNowDataStatistic('pio');
+    insertFreeNowDataStatistic('drak');
+    insertFreeNowDataStatistic('scn');
+    insertFreeNowDataStatistic('bel');
+    insertFreeNowDataStatistic('ada');
+    insertFreeNowDataStatistic('kap');
+    insertFreeNowDataStatistic('zsnbg');
+}, 30 * 60 * 1000);
