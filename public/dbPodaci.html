@@ -3,34 +3,57 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Parking servis</title>
+    <title>PE Info</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
+      integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <nav>
-      <a href="./dbPodaci">Tabele</a>
-      <a href="./statistika">Statistika</a>
+      <a href="./dbPodaci">Pregled</a>
       <a href="./mapa">Mapa</a>
       <a href="./01users">Korisnici</a>
-      <a href="./03locations">Uredjaji</a>
-      <a href="./02zones">Objekti</a>
+      <div class="dropdown">
+        <button id="dropdown-btn-locations">
+          Uredjaji <span class="caret"></span>
+        </button>
+        <div class="item-list-locations">
+          <a href="./03locations">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button id="dropdown-btn">Objekti <span class="caret"></span></button>
+        <div class="item-list">
+          <a href="./02zones">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
       <div class="user">
         <span id="user"></span>
-        <a href="/" id="logout">Logout &#10162;</a>
+        <a href="/" id="logout">Odjava &#10162;</a>
       </div>
     </nav>
     <section>
-      <div class="container">
-        <h1>Podaci iz baze podataka</h1>
+      <div class="container table-locations">
+        <h1>Pregled stanja uredjaja</h1>
         <table class="table">
           <thead>
             <tr>
-              <th>Objekat</th>
-              <th>Oznaka</th>
-              <th>Kapacitet</th>
-              <th>Slobodno</th>
-              <th></th>
-              <th>Popunjenost</th>
+              <th>ID</th>
+              <th>Uređaj</th>
+              <th>Displej 1</th>
+              <th>Displej 2</th>
+              <th>Displej 3</th>
+              <th>Displej 4</th>
+              <th>Zadnje javljanje</th>
+              <th>Napomena</th>
             </tr>
           </thead>
           <tbody id="table1"></tbody>
@@ -246,8 +269,7 @@
         </table>
       </div>
     </section>
-
+    <script src="./main.js"></script>
     <script src="./vezaSaServerom.js"></script>
-    <!-- <script type="module" src="./loginUser.js"></script> -->
   </body>
 </html>

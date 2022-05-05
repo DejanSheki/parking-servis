@@ -1,10 +1,17 @@
 const login = document.querySelector("#login");
 const logMsg = document.querySelector('.message');
 
+function clearInp() {
+    document.querySelectorAll("input").forEach(val => {
+        val.value = '';
+    });
+}
+
 login.addEventListener("click", () => {
     const userName = document.querySelector("input[name='username']").value;
     const userPassw = document.querySelector("input[name='password']").value;
     const loginData = { userName, userPassw };
+    clearInp();
     return fetchUserData(loginData)
     // .then(user => console.log(user.userName))
     // .catch(err => console.log(err));
