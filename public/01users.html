@@ -4,66 +4,78 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Krisnici</title>
+    <title>PE Info</title>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <nav>
-      <a href="./dbPodaci">Tabele</a>
-      <a href="./statistika">Statistika</a>
+      <a href="./dbPodaci">Pregled</a>
       <a href="./mapa">Mapa</a>
       <a href="./01users">Korisnici</a>
-      <a href="./03locations">Uredjaji</a>
-      <a href="./02zones">Objekti</a>
+      <div class="dropdown">
+        <button id="dropdown-btn-locations">
+          Uredjaji <span class="caret"></span>
+        </button>
+        <div class="item-list-locations">
+          <a href="./03locations">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button id="dropdown-btn">Objekti <span class="caret"></span></button>
+        <div class="item-list">
+          <a href="./02zones">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
       <div class="user">
         <span id="user"></span>
-        <a href="/" id="logout">Logout &#10162;</a>
+        <a href="/" id="logout">Odjava &#10162;</a>
       </div>
     </nav>
-    <div class="insert-user remove">
-      <div class="container insert-form">
-        <h3>Unesi podatke novog korisnika</h3>
-        <form id="adminForm">
-          <label for="userName">User Name:</label>
-          <input type="text" id="userName" required />
-          <label for="userPassw">Password:</label>
-          <input type="password" name="" id="userPassw" required />
-          <label for="userFLname">Full Name:</label>
-          <input type="text" name="" id="userFLname" required />
-          <label for="userRank">User Rank:</label>
-          <select name="userRank" id="userRank" required>
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-          <label for="userTitle">User Rank:</label>
-          <select name="userTitle" id="userTitle" required>
-            <option value="SSuperAdmin">SSuperAdmin</option>
-            <option value="SuperAdmin">SuperAdmin</option>
-            <option value="Admin">Admin</option>
-            <option value="User">User</option>
-          </select>
-          <label for="userMail">Email:</label>
-          <input type="email" name="" id="userMail" required />
-          <label for="userInfoType">Info Type</label>
-          <select name="userInfoType" id="userInfoType" required>
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-          <label for="userInfoTime">Info Time</label>
-          <input
-            type="time"
-            name="time"
-            id="userInfoTime"
-            timeformat="24h"
-            required
-          />
-          <button type="submit" id="submit">Submit</button>
-        </form>
-      </div>
+    <div class="insert-user">
+      <form id="adminForm" class="insert-form">
+        <label for="userName">User Name:</label>
+        <input type="text" id="userName" required />
+        <label for="userPassw">Password:</label>
+        <input type="password" name="" id="userPassw" required />
+        <label for="userFLname">Full Name:</label>
+        <input type="text" name="" id="userFLname" required />
+        <label for="userRank">User Rank:</label>
+        <select name="userRank" id="userRank" required>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+        <label for="userTitle">User Rank:</label>
+        <select name="userTitle" id="userTitle" required>
+          <option value="SSuperAdmin">SSuperAdmin</option>
+          <option value="SuperAdmin">SuperAdmin</option>
+          <option value="Admin">Admin</option>
+          <option value="User">User</option>
+        </select>
+        <label for="userMail">Email:</label>
+        <input type="email" name="" id="userMail" required />
+        <label for="userInfoType">Info Type</label>
+        <select name="userInfoType" id="userInfoType" required>
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+        <label for="userInfoTime">Info Time</label>
+        <input
+          type="time"
+          name="time"
+          id="userInfoTime"
+          timeformat="24h"
+          value="07:00"
+          required
+        />
+        <button type="submit" id="submit">Dodaj</button>
+        <button id="close">Otkaži</button>
+      </form>
     </div>
     <div class="container">
       <div class="header">
@@ -85,5 +97,6 @@
       </table>
     </div>
   </body>
+  <script src="./main.js"></script>
   <script src="/01users.js"></script>
 </html>

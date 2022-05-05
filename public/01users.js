@@ -8,6 +8,7 @@ const userMail = document.querySelector('#userMail');
 const userInfoType = document.querySelector('#userInfoType');
 const userInfoTime = document.querySelector('#userInfoTime');
 const submit = document.querySelector('#submit');
+const closeBtn = document.querySelector('#close');
 const form = document.querySelector('#adminForm');
 const insertUserForm = document.querySelector('.insert-user');
 const userTable = document.querySelector('#user-table');
@@ -37,14 +38,14 @@ if (sessionStorage.userRank === '1') {
     userTitle[1].classList.add('remove');
 }
 addUser.addEventListener('click', () => {
-    insertUserForm.classList.remove('remove');
+    insertUserForm.classList.add('edit-container-show');
 });
 
 // Obrcemo redosled u stringu(datum 2022-01-01 -> 01.01.2022)
 function reverseString(str) {
     const date = new Date(str).toLocaleDateString('sr');
     const hours = new Date(str).toLocaleTimeString('sr');
-    return `${date} / ${hours}`;
+    return `${date} &nbsp; ${hours}`;
 }
 
 // Svi korisnici iz baze
@@ -62,7 +63,7 @@ function createTable(dbData) {
             <td>${dat.userMail}</td>
 			<td>${dat.userTitle}</td>
 			<td>${reverseString(dat.userCreatedTD)}</td>
-            <td><button id=${dat.userID}>Delete</button></td>
+            <td><button id=${dat.userID}>Obriši</button></td>
 		`;
         userTable.appendChild(tr);
     });
@@ -112,6 +113,9 @@ form.addEventListener('submit', (e) => {
     form.reset();
     userTable.innerHTML = '';
     fetchData();
-    insertUserForm.classList.add('remove');
+    insertUserForm.classList.remove('edit-container-show');
 });
 
+closeBtn.addEventListener('click', () => {
+    insertUserForm.classList.remove('edit-container-show');
+});
