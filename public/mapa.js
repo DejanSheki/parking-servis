@@ -30,24 +30,24 @@ let obradjeniPodaci = [];
 let style = [];
 let iconStyle;
 async function getData() {
-    const dataFetch = await fetch("http://192.168.0.10:2021/getAllData");
+    const dataFetch = await fetch("http://192.168.0.10:2021/getAllActiveZonesData");
     const podaci = await dataFetch.json();
     // podaci.map((item) => {
     //     console.log(item);
     // })
     podaci.map(podatak => {
         console.log(podatak);
-        let koordinate = podatak.koordinate.match(/\d+(?:\.\d+)?/g).map(Number);
-        // let koordinate = [podatak.koordinate]
-        let lokacija = parseInt(podatak.lokacija);
-        let zauzeto = podatak.kapacitet - podatak.slobodna_mesta;
-        let popunjenost = percentageCalculator(zauzeto, podatak.kapacitet);
+        // let koordinate = podatak.koordinate.match(/\d+(?:\.\d+)?/g).map(Number);
+        let koordinate = [podatak.zoneLong, podatak.zoneLat];
+        let lokacija = parseInt(podatak.zoneNumber);
+        let zauzeto = podatak.zoneMaxFree - podatak.zoneFreeNow;
+        let popunjenost = percentageCalculator(zauzeto, podatak.zoneMaxFree);
         podatak = new ol.Feature({
             geometry: new ol.geom.Point(ol.proj.fromLonLat(koordinate)),
             ime: lokacija.toString(),
             podaci: podatak.naziv_lokacije,
             popunjenost: popunjenost,
-            slMesta: parseInt(podatak.slobodna_mesta).toString(),
+            slMesta: parseInt(podatak.zoneFreeNow).toString(),
         });
         iconStyle = new ol.style.Style({
             image: new ol.style.Circle({

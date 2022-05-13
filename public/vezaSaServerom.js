@@ -1,18 +1,13 @@
 const user = document.querySelector('#user');
 user.innerHTML = sessionStorage.loggedUser;
 const tabela = document.querySelector('#table');
+const tabela1 = document.querySelector('#table1');
 
-// Obrcemo redosled u stringu(2022-04-07 21:56:33 -> 07.04.2022 21:56:33)
-// function reverseString(str) {
-//     let datum = str.split(' ');
-//     let dat = datum[0].split('-').reverse().join('.');
-//     let vreme = datum[1];
-//     return dat + '  ' + vreme;
-// }
 function reverseString(str) {
-    const date = new Date(str).toLocaleDateString('sr');
-    const hours = new Date(str).toLocaleTimeString('sr');
-    return `${date} ${hours}`;
+    const date = new Date(str).toLocaleString('sr');
+    // const hours = new Date(str).toLocaleTimeString('sr');
+    // return `${date} ${hours}`;
+    return date;
 }
 
 // Hvatamo podatke sa servera
@@ -24,19 +19,60 @@ async function fetchApi(url) {
 
 // Pravimo tabelu 
 async function fetchData() {
-    // const fetchLink = "http://192.168.42.42:2021/getAllActiveLocations";
-    // const data = await fetchApi(fetchLink);
-    // createTable(data);
-    // console.log(data);
-    // return data;
     Promise.all([
-        fetch('http://192.168.42.42:2021/getAllActiveLocations')
+        fetch('http://192.168.0.10:2021/getAllActiveLocations')
             .then(data => data.json()),
-        fetch('http://192.168.42.42:2021/getAllActiveZonesData')
+        fetch('http://192.168.0.10:2021/getAllActiveZonesData')
             .then(data => data.json())
     ]).then((dbData) => {
         createTable(dbData);
     })
+}
+
+function lastPacket(dbData) {
+    let packet = [];
+    dbData[0].forEach(dat => {
+        if (dat.locLastPacket != null) {
+            const splitedPacket = dat.locLastPacket.split(',');
+            packet.push(new Object({
+                vrstaPaketa: splitedPacket[0],
+                adresa: splitedPacket[1],
+                displej1: splitedPacket[2],
+                displej2: splitedPacket[3],
+                displej3: splitedPacket[4],
+                displej4: splitedPacket[5],
+                osvetljenje: splitedPacket[6],
+                accuNapon: splitedPacket[7],
+                accuTemp: splitedPacket[8],
+                in220: splitedPacket[9],
+                inBack1: splitedPacket[10],
+                inBack2: splitedPacket[11],
+                inBack3: splitedPacket[12],
+                inBack4: splitedPacket[13],
+                osvetljenjeHi: splitedPacket[14],
+                osvetljenjeLo: splitedPacket[15],
+                accuCutOff: splitedPacket[16],
+                offTimeSec: splitedPacket[17],
+                rele220v: splitedPacket[18],
+                releAccu: splitedPacket[19],
+                releOff: splitedPacket[20],
+                testTimerSec: splitedPacket[21],
+                test: splitedPacket[22],
+                Pow: splitedPacket[23],
+                RstS: splitedPacket[24],
+                RstH: splitedPacket[25],
+                Pck: splitedPacket[26],
+                Ses: splitedPacket[27],
+                Cid: splitedPacket[28],
+                IPa: splitedPacket[29],
+                Rev: splitedPacket[30],
+                Ver: splitedPacket[31],
+                Sgn: splitedPacket[32],
+                checksum: splitedPacket[33]
+            }))
+        }
+    })
+    return packet;
 }
 
 function display(dbData, dat) {
@@ -65,10 +101,35 @@ function display(dbData, dat) {
     })
     return displayData;
 }
-
-const tabela1 = document.querySelector('#table1');
+function displayValue(dbData, dat) {
+    const displayValue = {};
+    dbData[0].forEach(d => {
+        if (dat.locDisp1zoneID === 0) {
+            displayValue.d1 = ' ';
+        } else {
+            displayValue.d1 = dat.locDisp1value;
+        }
+        if (dat.locDisp2zoneID === 0) {
+            displayValue.d2 = ' ';
+        } else {
+            displayValue.d2 = dat.locDisp2value;
+        }
+        if (dat.locDisp3zoneID === 0) {
+            displayValue.d3 = ' ';
+        } else {
+            displayValue.d3 = dat.locDisp3value;
+        }
+        if (dat.locDisp4zoneID === 0) {
+            displayValue.d4 = ' ';
+        } else {
+            displayValue.d4 = dat.locDisp4value;
+        }
+    })
+    return displayValue;
+}
 
 function createTable(dbData) {
+    // console.log(lastPacket(dbData));
     dbData[0].forEach(dat => {
         let model = () => {
             if (dat.locType === 1) {
@@ -88,18 +149,25 @@ function createTable(dbData) {
                 }
             }
         }
+        let note = () => {
+            if (lastPacket(dbData).find(d => d.adresa === dat.locNumber) !== undefined) {
+                return lastPacket(dbData).find(d => d.adresa === dat.locNumber).osvetljenje;
+            } else {
+                return 0;
+            }
+        }
         const { locModel, idBackground } = model();
         const tr = document.createElement('tr');
         tr.classList.add(`${dat.locID}`);
         tr.innerHTML = `
             <th style="background-color: ${idBackground};">${locModel}</th>
         	<td>${dat.locSname}</td>
-        	<td>${display(dbData, dat).d1}  ${dat.locDisp1value}</td>
-        	<td>${display(dbData, dat).d2}  ${dat.locDisp2value}</td>
-        	<td>${display(dbData, dat).d3}  ${dat.locDisp3value}</td>
-        	<td>${display(dbData, dat).d4}  ${dat.locDisp4value}</td>
+        	<td>${display(dbData, dat).d1}  ${displayValue(dbData, dat).d1}</td>
+        	<td>${display(dbData, dat).d2}  ${displayValue(dbData, dat).d2}</td>
+        	<td>${display(dbData, dat).d3}  ${displayValue(dbData, dat).d3}</td>
+        	<td>${display(dbData, dat).d4}  ${displayValue(dbData, dat).d4}</td>
         	<td>${reverseString(dat.locLastCommTD)}</td>
-        	<td><i class="fa fa-lightbulb"></i></td>
+        	<td><i class="fa fa-lightbulb"> &nbsp; </i>${note()}</td>
         `;
         tabela1.appendChild(tr);
     });
@@ -229,7 +297,7 @@ function bgColor(popunjenost, bgSlMesta, bgPopunjenost) {
 
 //table
 async function fetchDataVuk() {
-    const fetchLink = "http://192.168.42.42:2021/vuk";
+    const fetchLink = "http://192.168.0.10:2021/vuk";
     const data = await fetchApi(fetchLink);
     slMesta01.textContent = Number(data[0].zoneFreeNow);
     popunjenost01.textContent = data[0].zoneOccup + '%';
@@ -238,7 +306,7 @@ async function fetchDataVuk() {
 }
 fetchDataVuk();
 async function fetchDataSla() {
-    const fetchLink = "http://192.168.42.42:2021/sla";
+    const fetchLink = "http://192.168.0.10:2021/sla";
     const data = await fetchApi(fetchLink);
     slMesta02.textContent = Number(data[0].zoneFreeNow);
     popunjenost02.textContent = data[0].zoneOccup + '%';
@@ -247,7 +315,7 @@ async function fetchDataSla() {
 }
 fetchDataSla();
 async function fetchDataMgm() {
-    const fetchLink = "http://192.168.42.42:2021/mgm";
+    const fetchLink = "http://192.168.0.10:2021/mgm";
     const data = await fetchApi(fetchLink);
     slMesta03.textContent = Number(data[0].zoneFreeNow);
     popunjenost03.textContent = data[0].zoneOccup + '%';
@@ -256,7 +324,7 @@ async function fetchDataMgm() {
 }
 fetchDataMgm();
 async function fetchDataCvP() {
-    const fetchLink = "http://192.168.42.42:2021/cvp";
+    const fetchLink = "http://192.168.0.10:2021/cvp";
     const data = await fetchApi(fetchLink);
     slMesta04.textContent = Number(data[0].zoneFreeNow);
     popunjenost04.textContent = data[0].zoneOccup + '%';
@@ -265,7 +333,7 @@ async function fetchDataCvP() {
 }
 fetchDataCvP();
 async function fetchDataMk() {
-    const fetchLink = "http://192.168.42.42:2021/mk";
+    const fetchLink = "http://192.168.0.10:2021/mk";
     const data = await fetchApi(fetchLink);
     slMesta05.textContent = Number(data[0].zoneFreeNow);
     popunjenost05.textContent = data[0].zoneOccup + '%';
@@ -274,7 +342,7 @@ async function fetchDataMk() {
 }
 fetchDataMk();
 async function fetchDataDg() {
-    const fetchLink = "http://192.168.42.42:2021/dg";
+    const fetchLink = "http://192.168.0.10:2021/dg";
     const data = await fetchApi(fetchLink);
     slMesta06.textContent = Number(data[0].zoneFreeNow);
     popunjenost06.textContent = data[0].zoneOccup + '%';
@@ -283,7 +351,7 @@ async function fetchDataDg() {
 }
 fetchDataDg();
 async function fetchDataPol() {
-    const fetchLink = "http://192.168.42.42:2021/pol";
+    const fetchLink = "http://192.168.0.10:2021/pol";
     const data = await fetchApi(fetchLink);
     slMesta07.textContent = Number(data[0].zoneFreeNow);
     popunjenost07.textContent = data[0].zoneOccup + '%';
@@ -292,7 +360,7 @@ async function fetchDataPol() {
 }
 fetchDataPol();
 async function fetchDataKam() {
-    const fetchLink = "http://192.168.42.42:2021/kam";
+    const fetchLink = "http://192.168.0.10:2021/kam";
     const data = await fetchApi(fetchLink);
     slMesta08.textContent = Number(data[0].zoneFreeNow);
     popunjenost08.textContent = data[0].zoneOccup + '%';
@@ -301,7 +369,7 @@ async function fetchDataKam() {
 }
 fetchDataKam();
 async function fetchDataVis() {
-    const fetchLink = "http://192.168.42.42:2021/vis";
+    const fetchLink = "http://192.168.0.10:2021/vis";
     const data = await fetchApi(fetchLink);
     slMesta09.textContent = Number(data[0].zoneFreeNow);
     popunjenost09.textContent = data[0].zoneOccup + '%';
@@ -310,7 +378,7 @@ async function fetchDataVis() {
 }
 fetchDataVis();
 async function fetchDataCuk() {
-    const fetchLink = "http://192.168.42.42:2021/cuk";
+    const fetchLink = "http://192.168.0.10:2021/cuk";
     const data = await fetchApi(fetchLink);
     slMesta10.textContent = Number(data[0].zoneFreeNow);
     popunjenost10.textContent = data[0].zoneOccup + '%';
@@ -319,7 +387,7 @@ async function fetchDataCuk() {
 }
 fetchDataCuk();
 async function fetchDataBv() {
-    const fetchLink = "http://192.168.42.42:2021/bv";
+    const fetchLink = "http://192.168.0.10:2021/bv";
     const data = await fetchApi(fetchLink);
     slMesta11.textContent = Number(data[0].zoneFreeNow);
     popunjenost11.textContent = data[0].zoneOccup + '%';
@@ -328,7 +396,7 @@ async function fetchDataBv() {
 }
 fetchDataBv();
 async function fetchDataBba() {
-    const fetchLink = "http://192.168.42.42:2021/bba";
+    const fetchLink = "http://192.168.0.10:2021/bba";
     const data = await fetchApi(fetchLink);
     slMesta12.textContent = Number(data[0].zoneFreeNow);
     popunjenost12.textContent = data[0].zoneOccup + '%';
@@ -337,7 +405,7 @@ async function fetchDataBba() {
 }
 fetchDataBba();
 async function fetchDataOnbg() {
-    const fetchLink = "http://192.168.42.42:2021/onbg";
+    const fetchLink = "http://192.168.0.10:2021/onbg";
     const data = await fetchApi(fetchLink);
     slMesta13.textContent = Number(data[0].zoneFreeNow);
     popunjenost13.textContent = data[0].zoneOccup + '%';
@@ -346,7 +414,7 @@ async function fetchDataOnbg() {
 }
 fetchDataOnbg();
 async function fetchDataVma() {
-    const fetchLink = "http://192.168.42.42:2021/vma";
+    const fetchLink = "http://192.168.0.10:2021/vma";
     const data = await fetchApi(fetchLink);
     slMesta14.textContent = Number(data[0].zoneFreeNow);
     popunjenost14.textContent = data[0].zoneOccup + '%';
@@ -355,7 +423,7 @@ async function fetchDataVma() {
 }
 fetchDataVma();
 async function fetchDataObi() {
-    const fetchLink = "http://192.168.42.42:2021/obi";
+    const fetchLink = "http://192.168.0.10:2021/obi";
     const data = await fetchApi(fetchLink);
     slMesta15.textContent = Number(data[0].zoneFreeNow);
     popunjenost15.textContent = data[0].zoneOccup + '%';
@@ -364,7 +432,7 @@ async function fetchDataObi() {
 }
 fetchDataObi();
 async function fetchDataZel() {
-    const fetchLink = "http://192.168.42.42:2021/zel";
+    const fetchLink = "http://192.168.0.10:2021/zel";
     const data = await fetchApi(fetchLink);
     slMesta16.textContent = Number(data[0].zoneFreeNow);
     popunjenost16.textContent = data[0].zoneOccup + '%';
@@ -373,7 +441,7 @@ async function fetchDataZel() {
 }
 fetchDataZel();
 async function fetchDataMas() {
-    const fetchLink = "http://192.168.42.42:2021/mas";
+    const fetchLink = "http://192.168.0.10:2021/mas";
     const data = await fetchApi(fetchLink);
     slMesta17.textContent = Number(data[0].zoneFreeNow);
     popunjenost17.textContent = data[0].zoneOccup + '%';
@@ -382,7 +450,7 @@ async function fetchDataMas() {
 }
 fetchDataMas();
 async function fetchDataPio() {
-    const fetchLink = "http://192.168.42.42:2021/pio";
+    const fetchLink = "http://192.168.0.10:2021/pio";
     const data = await fetchApi(fetchLink);
     slMesta18.textContent = Number(data[0].zoneFreeNow);
     popunjenost18.textContent = data[0].zoneOccup + '%';
@@ -391,7 +459,7 @@ async function fetchDataPio() {
 }
 fetchDataPio();
 async function fetchDataDrak() {
-    const fetchLink = "http://192.168.42.42:2021/drak";
+    const fetchLink = "http://192.168.0.10:2021/drak";
     const data = await fetchApi(fetchLink);
     slMesta19.textContent = Number(data[0].zoneFreeNow);
     popunjenost19.textContent = data[0].zoneOccup + '%';
@@ -400,7 +468,7 @@ async function fetchDataDrak() {
 }
 fetchDataDrak();
 async function fetchDataScn() {
-    const fetchLink = "http://192.168.42.42:2021/scn";
+    const fetchLink = "http://192.168.0.10:2021/scn";
     const data = await fetchApi(fetchLink);
     slMesta20.textContent = Number(data[0].zoneFreeNow);
     popunjenost20.textContent = data[0].zoneOccup + '%';
@@ -409,7 +477,7 @@ async function fetchDataScn() {
 }
 fetchDataScn();
 async function fetchDataBel() {
-    const fetchLink = "http://192.168.42.42:2021/bel";
+    const fetchLink = "http://192.168.0.10:2021/bel";
     const data = await fetchApi(fetchLink);
     slMesta21.textContent = Number(data[0].zoneFreeNow);
     popunjenost21.textContent = data[0].zoneOccup + '%';
@@ -418,7 +486,7 @@ async function fetchDataBel() {
 }
 fetchDataBel();
 async function fetchDataAda() {
-    const fetchLink = "http://192.168.42.42:2021/ada";
+    const fetchLink = "http://192.168.0.10:2021/ada";
     const data = await fetchApi(fetchLink);
     slMesta22.textContent = Number(data[0].zoneFreeNow);
     popunjenost22.textContent = data[0].zoneOccup + '%';
@@ -427,7 +495,7 @@ async function fetchDataAda() {
 }
 fetchDataAda();
 async function fetchDataKap() {
-    const fetchLink = "http://192.168.42.42:2021/kap";
+    const fetchLink = "http://192.168.0.10:2021/kap";
     const data = await fetchApi(fetchLink);
     slMesta23.textContent = Number(data[0].zoneFreeNow);
     popunjenost23.textContent = data[0].zoneOccup + '%';
@@ -436,7 +504,7 @@ async function fetchDataKap() {
 }
 fetchDataKap();
 async function fetchDataZsnbg() {
-    const fetchLink = "http://192.168.42.42:2021/zsnbg";
+    const fetchLink = "http://192.168.0.10:2021/zsnbg";
     const data = await fetchApi(fetchLink);
     slMesta24.textContent = Number(data[0].zoneFreeNow);
     popunjenost24.textContent = data[0].zoneOccup + '%';

@@ -11,6 +11,10 @@ const closeBtn = document.querySelector('#close');
 const locSname = document.querySelector('#locSname');
 const locLname = document.querySelector('#locLname');
 const locType = document.querySelector('#locType');
+const displej1 = document.querySelector('#locDisp1zoneID');
+const displej2 = document.querySelector('#locDisp2zoneID');
+const displej3 = document.querySelector('#locDisp3zoneID');
+const displej4 = document.querySelector('#locDisp4zoneID');
 const locNumber = document.querySelector('#locNumber');
 const locDesc = document.querySelector('#locDesc');
 const locLat = document.querySelector('#locLat');
@@ -44,6 +48,32 @@ const eventMask = (dat) => {
         return '&#45;';
     }
 }
+function display(dbData, dat) {
+    const displayData = {};
+    dbData[1].forEach(d => {
+        if (d.zoneID === dat.locDisp1zoneID) {
+            displayData.d1 = d.zoneShort;
+        } else if (displayData.d1 === undefined) {
+            displayData.d1 = '---';
+        }
+        if (d.zoneID === dat.locDisp2zoneID) {
+            displayData.d2 = d.zoneShort;
+        } else if (displayData.d2 === undefined) {
+            displayData.d2 = '---';
+        }
+        if (d.zoneID === dat.locDisp3zoneID) {
+            displayData.d3 = d.zoneShort;
+        } else if (displayData.d3 === undefined) {
+            displayData.d3 = '---';
+        }
+        if (d.zoneID === dat.locDisp4zoneID) {
+            displayData.d4 = d.zoneShort;
+        } else if (displayData.d4 === undefined) {
+            displayData.d4 = '---';
+        }
+    })
+    return displayData;
+}
 
 // Dodaj lokaciju
 locationAdd.addEventListener('click', () => {
@@ -62,13 +92,22 @@ function reverseString(str) {
 
 // Svi uredjaji iz baze
 async function fetchData() {
-    const data = await fetch("http://192.168.0.10:2021/getAllActiveLocations");
-    const dbData = await data.json();
-    createTable(dbData);
+    Promise.all([
+        fetch(`http://192.168.0.10:2021/getAllActiveLocations`)
+            .then(data => data.json()),
+        fetch(`http://192.168.0.10:2021/getAllActiveZonesData`)
+            .then(data => data.json())
+    ])
+        .then((dbData) => {
+            createTable(dbData)
+        })
+    // const data = await fetch("http://192.168.0.10:2021/getAllActiveLocations");
+    // const dbData = await data.json();
+    // createTable(dbData);
 }
 
 function createTable(dbData) {
-    dbData.forEach(dat => {
+    dbData[0].forEach(dat => {
         let tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${model(dat)}</td>
@@ -76,10 +115,10 @@ function createTable(dbData) {
             <td>${dat.locNumber}</td>
             <td>${dat.locLname}</td>
 			<td>${reverseString(dat.locLastCommTD)}</td>
-			<td>${dat.locDisp1value}</td>
-			<td>${dat.locDisp2value}</td>
-			<td>${dat.locDisp3value}</td>
-			<td>${dat.locDisp4value}</td>
+			<td>${display(dbData, dat).d1}</td>
+			<td>${display(dbData, dat).d2}</td>
+			<td>${display(dbData, dat).d3}</td>
+			<td>${display(dbData, dat).d4}</td>
             <td >${dat.locLastPacket}</td>
             <td><button class='editBtn' id=${dat.locID}>Izmeni</button></td>
             <td><button class='deleteBtn' id=${dat.locID}>Obriši</button></td>
@@ -118,36 +157,28 @@ function createTable(dbData) {
             Promise.all([
                 fetch(`http://192.168.0.10:2021/getLocationsDataByID`, options)
                     .then(data => data.json()),
-                fetch(`http://192.168.0.10:2021/getAllUsers`)
-                    .then(data => data.json()),
                 fetch(`http://192.168.0.10:2021/getAllActiveZonesData`)
+                    .then(data => data.json()),
+                fetch(`http://192.168.0.10:2021/getAllUsers`)
                     .then(data => data.json())
             ])
                 .then((dbData) => {
-                    const { locCreatedByID, locDisabledByID, locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID } = dbData[0][0];
-                    const { userFLname } = dbData[1].find(e => e.userID === locCreatedByID);
-                    // const zoneShort = dbData[2].filter(e => e.zoneID === locDisp1zoneID);
-                    const displayData = {};
-                    dbData[2].forEach(db => {
-                        if (db.zoneID === locDisp1zoneID) {
-                            displayData.d1 = db.zoneName;
-                        } else if (db.zoneID === locDisp2zoneID) {
-                            displayData.d2 = db.zoneName;
-                        } else if (db.zoneID === locDisp3zoneID) {
-                            displayData.d3 = db.zoneName;
-                        } else if (db.zoneID === locDisp4zoneID) {
-                            displayData.d4 = db.zoneName;
-                        }
-                    })
-                    const userName = () => {
-                        if (dbData[1].find(e => e.userID === locDisabledByID) !== undefined) {
-                            return dbData[1].find(e => e.userID === locDisabledByID);
-                        } else {
-                            return 0;
+                    const { locCreatedByID, locDisabledByID } = dbData[0][0];
+                    const { userFLname } = dbData[2].find(e => e.userID === locCreatedByID);
+                    const userName = (id, name) => {
+                        if (dbData[2].find(e => e.userID === locDisabledByID) === undefined) {
+                            name = '---';
+                            id = 0;
+                            return { id, name }
+                        } else if (dbData[2].find(e => e.userID === locDisabledByID)) {
+                            name = dbData[2].find(e => e.userID === locDisabledByID).userName;
+                            id = dbData[2].find(e => e.userID === locDisabledByID).userID;
+                            return { id, name };
                         }
                     }
                     const disabledByName = userName();
-                    createEditInput(dbData, userFLname, disabledByName, displayData);
+                    console.log(disabledByName);
+                    createEditInput(dbData, userFLname, disabledByName);
                 })
         });
     });
@@ -159,6 +190,10 @@ form.addEventListener('submit', (e) => {
     loc.locSname = locSname.value;
     loc.locLname = locLname.value;
     loc.locType = locType.value;
+    loc.locDisp1zoneID = displej1.value;
+    loc.locDisp2zoneID = displej2.value;
+    loc.locDisp3zoneID = displej3.value;
+    loc.locDisp4zoneID = displej4.value;
     loc.locNumber = locNumber.value;
     loc.locDesc = locDesc.value;
     loc.locLat = locLat.value;
@@ -178,7 +213,7 @@ form.addEventListener('submit', (e) => {
     insertLocation.classList.remove('edit-container-show');
 });
 
-function createEditInput(dbData, userFLname, disabledByName, displayData) {
+function createEditInput(dbData, userFLname, disabledByName) {
     editContainer.classList.add('edit-container-show');
     dbData[0].forEach(dat => {
         editInput.innerHTML = `
@@ -200,7 +235,8 @@ function createEditInput(dbData, userFLname, disabledByName, displayData) {
         <input type="text" name="locDesc" value="${dat.locDesc}" required />
         <label for="locDisp1zoneID">Displej 1: </label>
         <select name="locDisp1zoneID" id="locDisp1zoneID">
-            <option value="${dat.locDisp1zoneID}" selected>${displayData.d1}</option>
+            <option value="${dat.locDisp1zoneID}" selected>${display(dbData, dat).d1}</option>
+            <option value="0">---</option>
             <option value="1">Vukov spomenik</option>
             <option value="2">Slavija</option>
             <option value="3">MGM</option>
@@ -228,7 +264,8 @@ function createEditInput(dbData, userFLname, disabledByName, displayData) {
         </select>
         <label for="locDisp2zoneID">Displej 2: </label>
         <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp2zoneID}" selected>${displayData.d2}</option>
+        <option value="${dat.locDisp2zoneID}" selected>${display(dbData, dat).d2}</option>
+        <option value="0">---</option>
         <option value="1">Vukov spomenik</option>
         <option value="2">Slavija</option>
         <option value="3">MGM</option>
@@ -256,7 +293,8 @@ function createEditInput(dbData, userFLname, disabledByName, displayData) {
     </select>
         <label for="locDisp3zoneID">Displej 3: </label>
         <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp3zoneID}" selected>${displayData.d3}</option>
+        <option value="${dat.locDisp3zoneID}" selected>${display(dbData, dat).d3}</option>
+        <option value="0">---</option>
         <option value="1">Vukov spomenik</option>
         <option value="2">Slavija</option>
         <option value="3">MGM</option>
@@ -284,7 +322,8 @@ function createEditInput(dbData, userFLname, disabledByName, displayData) {
     </select>
         <label for="locDisp4zoneID">Displej 4: </label>
         <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp4zoneID}" selected>${displayData.d4}</option>
+        <option value="${dat.locDisp4zoneID}" selected>${display(dbData, dat).d4}</option>
+        <option value="0">---</option>
         <option value="1">Vukov spomenik</option>
         <option value="2">Slavija</option>
         <option value="3">MGM</option>
@@ -325,7 +364,7 @@ function createEditInput(dbData, userFLname, disabledByName, displayData) {
             <option value="1">Isključena</option>
         </select>
         <label for="locDisabledByID">Isključena od strane: </label>
-        <input type="text" name="locDisabledByID" value="${disabledByName.userName}" placeholder="${disabledByName}" required />
+        <input type="text" name="locDisabledByID" value="${disabledByName.name}" placeholder="${disabledByName.id}" required />
         <label for="locDisabledTD">Vreme privremenog isključenja: </label>
         <input type="text" name="locDisabledTD" value="${dat.locDisabledTD}" required />
         <label for="locDisableDesc">Opis privremenog isključenja: </label>
