@@ -113,6 +113,33 @@ class FileService {
             console.log(error);
         }
     }
+    // log file
+    async logFile(lastPacket) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                fs.appendFile(`./log-file.log`, (lastPacket), err => {
+                    if (err) reject(new Error(err.message));
+                    resolve(lastPacket);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async logFileSensit(lastPacket) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                fs.appendFile(`./log-file-sensit.log`, (lastPacket), err => {
+                    if (err) reject(new Error(err.message));
+                    resolve(lastPacket);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 module.exports = FileService;

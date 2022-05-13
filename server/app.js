@@ -96,7 +96,7 @@ app.post('/insertNewLocation', (request, response) => {
     const location = request.body;
     // console.log(location);
     const db = dbService.getDbServiceInstance();
-    const result = db.insertNewLocation(location.locType, location.locNumber, location.locSname, location.locLname, location.locDesc, location.locLat, location.locLong, location.locCreatedByID);
+    const result = db.insertNewLocation(location.locType, location.locDisp1zoneID, location.locDisp2zoneID, location.locDisp3zoneID, location.locDisp4zoneID, location.locNumber, location.locSname, location.locLname, location.locDesc, location.locLat, location.locLong, location.locCreatedByID);
     result
         .then(data => console.log(data))
         .catch(err => console.log(err));
