@@ -49,30 +49,57 @@ const eventMask = (dat) => {
     }
 }
 function display(dbData, dat) {
+    const zones = [...dbData[1], ...dbData[2]]
     const displayData = {};
-    dbData[1].forEach(d => {
-        if (d.zoneID === dat.locDisp1zoneID) {
+    zones.forEach(d => {
+        if (d.zoneShort === dat.locDisp1zoneID) {
             displayData.d1 = d.zoneShort;
         } else if (displayData.d1 === undefined) {
             displayData.d1 = '---';
         }
-        if (d.zoneID === dat.locDisp2zoneID) {
+        if (d.zoneShort === dat.locDisp2zoneID) {
             displayData.d2 = d.zoneShort;
         } else if (displayData.d2 === undefined) {
             displayData.d2 = '---';
         }
-        if (d.zoneID === dat.locDisp3zoneID) {
+        if (d.zoneShort === dat.locDisp3zoneID) {
             displayData.d3 = d.zoneShort;
         } else if (displayData.d3 === undefined) {
             displayData.d3 = '---';
         }
-        if (d.zoneID === dat.locDisp4zoneID) {
+        if (d.zoneShort === dat.locDisp4zoneID) {
             displayData.d4 = d.zoneShort;
         } else if (displayData.d4 === undefined) {
             displayData.d4 = '---';
         }
     })
     return displayData;
+}
+function selectedID(dbData, dat) {
+    const displayData = {};
+    dbData[0].forEach(d => {
+        if (d.locDisp1zoneID === undefined || dat.locDisp1zoneID === '0') {
+            displayData.d1 = '---';
+        } else {
+            displayData.d1 = dat.locDisp1zoneID;
+        }
+        if (dat.locDisp2zoneID === undefined || dat.locDisp2zoneID === '0') {
+            displayData.d2 = '---';
+        } else {
+            displayData.d2 = dat.locDisp2zoneID;
+        }
+        if (dat.locDisp3zoneID === undefined || dat.locDisp3zoneID === '0') {
+            displayData.d3 = '---';
+        } else {
+            displayData.d3 = dat.locDisp3zoneID;
+        }
+        if (dat.locDisp4zoneID === undefined || dat.locDisp4zoneID === '0') {
+            displayData.d4 = '---';
+        } else {
+            displayData.d4 = dat.locDisp4zoneID;
+        }
+    })
+    return displayData
 }
 
 // Dodaj lokaciju
@@ -96,14 +123,13 @@ async function fetchData() {
         fetch(`http://192.168.0.10:2021/getAllActiveLocations`)
             .then(data => data.json()),
         fetch(`http://192.168.0.10:2021/getAllActiveZonesData`)
+            .then(data => data.json()),
+        fetch('http://192.168.0.10:2021/get46finalSensit')
             .then(data => data.json())
     ])
         .then((dbData) => {
-            createTable(dbData)
+            createTable(dbData);
         })
-    // const data = await fetch("http://192.168.0.10:2021/getAllActiveLocations");
-    // const dbData = await data.json();
-    // createTable(dbData);
 }
 
 function createTable(dbData) {
@@ -160,11 +186,14 @@ function createTable(dbData) {
                 fetch(`http://192.168.0.10:2021/getAllActiveZonesData`)
                     .then(data => data.json()),
                 fetch(`http://192.168.0.10:2021/getAllUsers`)
+                    .then(data => data.json()),
+                fetch(`http://192.168.0.10:2021/get46finalSensit`)
                     .then(data => data.json())
             ])
                 .then((dbData) => {
                     const { locCreatedByID, locDisabledByID } = dbData[0][0];
                     const { userFLname } = dbData[2].find(e => e.userID === locCreatedByID);
+                    console.log(userFLname);
                     const userName = (id, name) => {
                         if (dbData[2].find(e => e.userID === locDisabledByID) === undefined) {
                             name = '---';
@@ -178,7 +207,9 @@ function createTable(dbData) {
                     }
                     const disabledByName = userName();
                     console.log(disabledByName);
+                    console.log(locDisabledByID);
                     createEditInput(dbData, userFLname, disabledByName);
+                    createOptions(dbData);
                 })
         });
     });
@@ -234,120 +265,24 @@ function createEditInput(dbData, userFLname, disabledByName) {
         <label for="locDesc">Opis: </label>
         <input type="text" name="locDesc" value="${dat.locDesc}" required />
         <label for="locDisp1zoneID">Displej 1: </label>
-        <select name="locDisp1zoneID" id="locDisp1zoneID">
-            <option value="${dat.locDisp1zoneID}" selected>${display(dbData, dat).d1}</option>
+        <select name="locDisp1zoneID" id="display1options">
+            <option value="${dat.locDisp1zoneID}" selected>${selectedID(dbData, dat).d1}</option>
             <option value="0">---</option>
-            <option value="1">Vukov spomenik</option>
-            <option value="2">Slavija</option>
-            <option value="3">MGM</option>
-            <option value="4">Cvetkova pijaca</option>
-            <option value="5">Mali Kalemegdan</option>
-            <option value="6">Donji grad</option>
-            <option value="7">Politika</option>
-            <option value="8">Kamenička</option>
-            <option value="9">Viška</option>
-            <option value="10">Čukarica</option>
-            <option value="11">Baba Višnjina</option>
-            <option value="12">Botanička bašta</option>
-            <option value="13">Opština Novi Beograd</option>
-            <option value="14">VMA</option>
-            <option value="15">Obilićev venac</option>
-            <option value="16">Zeleni venac</option>
-            <option value="17">Masarikova</option>
-            <option value="18">Pionirski park</option>
-            <option value="19">Dr Aleksandra Kostića</option>
-            <option value="20">Sava Centar</option>
-            <option value="21">Belvil</option>
-            <option value="22">Ada ciganlija</option>
-            <option value="23">Kapetanija</option>
-            <option value="24">Železnička stanica NBG</option>
         </select>
         <label for="locDisp2zoneID">Displej 2: </label>
-        <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp2zoneID}" selected>${display(dbData, dat).d2}</option>
+        <select name="locDisp1zoneID" id="display2options">
+        <option value="${dat.locDisp2zoneID}" selected>${selectedID(dbData, dat).d2}</option>
         <option value="0">---</option>
-        <option value="1">Vukov spomenik</option>
-        <option value="2">Slavija</option>
-        <option value="3">MGM</option>
-        <option value="4">Cvetkova pijaca</option>
-        <option value="5">Mali Kalemegdan</option>
-        <option value="6">Donji grad</option>
-        <option value="7">Politika</option>
-        <option value="8">Kamenička</option>
-        <option value="9">Viška</option>
-        <option value="10">Čukarica</option>
-        <option value="11">Baba Višnjina</option>
-        <option value="12">Botanička bašta</option>
-        <option value="13">Opština Novi Beograd</option>
-        <option value="14">VMA</option>
-        <option value="15">Obilićev venac</option>
-        <option value="16">Zeleni venac</option>
-        <option value="17">Masarikova</option>
-        <option value="18">Pionirski park</option>
-        <option value="19">Dr Aleksandra Kostića</option>
-        <option value="20">Sava Centar</option>
-        <option value="21">Belvil</option>
-        <option value="22">Ada ciganlija</option>
-        <option value="23">Kapetanija</option>
-        <option value="24">Železnička stanica NBG</option>
     </select>
         <label for="locDisp3zoneID">Displej 3: </label>
-        <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp3zoneID}" selected>${display(dbData, dat).d3}</option>
+        <select name="locDisp1zoneID" id="display3options">
+        <option value="${dat.locDisp3zoneID}" selected>${selectedID(dbData, dat).d3}</option>
         <option value="0">---</option>
-        <option value="1">Vukov spomenik</option>
-        <option value="2">Slavija</option>
-        <option value="3">MGM</option>
-        <option value="4">Cvetkova pijaca</option>
-        <option value="5">Mali Kalemegdan</option>
-        <option value="6">Donji grad</option>
-        <option value="7">Politika</option>
-        <option value="8">Kamenička</option>
-        <option value="9">Viška</option>
-        <option value="10">Čukarica</option>
-        <option value="11">Baba Višnjina</option>
-        <option value="12">Botanička bašta</option>
-        <option value="13">Opština Novi Beograd</option>
-        <option value="14">VMA</option>
-        <option value="15">Obilićev venac</option>
-        <option value="16">Zeleni venac</option>
-        <option value="17">Masarikova</option>
-        <option value="18">Pionirski park</option>
-        <option value="19">Dr Aleksandra Kostića</option>
-        <option value="20">Sava Centar</option>
-        <option value="21">Belvil</option>
-        <option value="22">Ada ciganlija</option>
-        <option value="23">Kapetanija</option>
-        <option value="24">Železnička stanica NBG</option>
     </select>
         <label for="locDisp4zoneID">Displej 4: </label>
-        <select name="locDisp1zoneID" id="locDisp1zoneID">
-        <option value="${dat.locDisp4zoneID}" selected>${display(dbData, dat).d4}</option>
+        <select name="locDisp1zoneID" id="display4options">
+        <option value="${dat.locDisp4zoneID}" selected>${selectedID(dbData, dat).d4}</option>
         <option value="0">---</option>
-        <option value="1">Vukov spomenik</option>
-        <option value="2">Slavija</option>
-        <option value="3">MGM</option>
-        <option value="4">Cvetkova pijaca</option>
-        <option value="5">Mali Kalemegdan</option>
-        <option value="6">Donji grad</option>
-        <option value="7">Politika</option>
-        <option value="8">Kamenička</option>
-        <option value="9">Viška</option>
-        <option value="10">Čukarica</option>
-        <option value="11">Baba Višnjina</option>
-        <option value="12">Botanička bašta</option>
-        <option value="13">Opština Novi Beograd</option>
-        <option value="14">VMA</option>
-        <option value="15">Obilićev venac</option>
-        <option value="16">Zeleni venac</option>
-        <option value="17">Masarikova</option>
-        <option value="18">Pionirski park</option>
-        <option value="19">Dr Aleksandra Kostića</option>
-        <option value="20">Sava Centar</option>
-        <option value="21">Belvil</option>
-        <option value="22">Ada ciganlija</option>
-        <option value="23">Kapetanija</option>
-        <option value="24">Železnička stanica NBG</option>
     </select>
         <label for="locLat">Latituda: </label>
         <input type="text" name="locLat" value="${dat.locLat}" required />
@@ -423,3 +358,16 @@ const interval = setInterval(() => {
     fetchData();
 }, 30000);
 
+function createOptions(dbData) {
+    const locDisp1 = document.querySelector('#display1options');
+    const locDisp2 = document.querySelector('#display2options');
+    const locDisp3 = document.querySelector('#display3options');
+    const locDisp4 = document.querySelector('#display4options');
+    const data = [...dbData[1], ...dbData[3]]
+    data.forEach(dat => {
+        locDisp1.add(new Option(dat.zoneName, dat.zoneShort));
+        locDisp2.add(new Option(dat.zoneName, dat.zoneShort));
+        locDisp3.add(new Option(dat.zoneName, dat.zoneShort));
+        locDisp4.add(new Option(dat.zoneName, dat.zoneShort));
+    })
+}

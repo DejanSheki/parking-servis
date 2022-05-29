@@ -23,6 +23,8 @@ async function fetchData() {
         fetch('http://192.168.0.10:2021/getAllActiveLocations')
             .then(data => data.json()),
         fetch('http://192.168.0.10:2021/getAllActiveZonesData')
+            .then(data => data.json()),
+        fetch('http://192.168.0.10:2021/get46finalSensit')
             .then(data => data.json())
     ]).then((dbData) => {
         createTable(dbData);
@@ -76,24 +78,26 @@ function lastPacket(dbData) {
 }
 
 function display(dbData, dat) {
+    const zones = [...dbData[1], ...dbData[2]];
     const displayData = {};
-    dbData[1].forEach(d => {
-        if (d.zoneID === dat.locDisp1zoneID) {
+    zones.forEach(d => {
+        if (d.zoneShort == dat.locDisp1zoneID) {
             displayData.d1 = d.zoneShort;
+            console.log(d.zoneShort);
         } else if (displayData.d1 === undefined) {
             displayData.d1 = '---';
         }
-        if (d.zoneID === dat.locDisp2zoneID) {
+        if (d.zoneShort.toString() === dat.locDisp2zoneID) {
             displayData.d2 = d.zoneShort;
         } else if (displayData.d2 === undefined) {
             displayData.d2 = '---';
         }
-        if (d.zoneID === dat.locDisp3zoneID) {
+        if (d.zoneShort === dat.locDisp3zoneID) {
             displayData.d3 = d.zoneShort;
         } else if (displayData.d3 === undefined) {
             displayData.d3 = '---';
         }
-        if (d.zoneID === dat.locDisp4zoneID) {
+        if (d.zoneShort === dat.locDisp4zoneID) {
             displayData.d4 = d.zoneShort;
         } else if (displayData.d4 === undefined) {
             displayData.d4 = '---';
@@ -104,22 +108,22 @@ function display(dbData, dat) {
 function displayValue(dbData, dat) {
     const displayValue = {};
     dbData[0].forEach(d => {
-        if (dat.locDisp1zoneID === 0) {
+        if (dat.locDisp1zoneID === '0') {
             displayValue.d1 = ' ';
         } else {
             displayValue.d1 = dat.locDisp1value;
         }
-        if (dat.locDisp2zoneID === 0) {
+        if (dat.locDisp2zoneID === '0') {
             displayValue.d2 = ' ';
         } else {
             displayValue.d2 = dat.locDisp2value;
         }
-        if (dat.locDisp3zoneID === 0) {
+        if (dat.locDisp3zoneID === '0') {
             displayValue.d3 = ' ';
         } else {
             displayValue.d3 = dat.locDisp3value;
         }
-        if (dat.locDisp4zoneID === 0) {
+        if (dat.locDisp4zoneID === '0') {
             displayValue.d4 = ' ';
         } else {
             displayValue.d4 = dat.locDisp4value;
@@ -129,7 +133,6 @@ function displayValue(dbData, dat) {
 }
 
 function createTable(dbData) {
-    // console.log(lastPacket(dbData));
     dbData[0].forEach(dat => {
         let model = () => {
             if (dat.locType === 1) {
@@ -176,7 +179,9 @@ fetchData();
 
 const intervalLocations = setInterval(() => {
     tabela1.innerHTML = '';
+    sensitTable.innerHTML = '';
     fetchData();
+    fetchSensitData();
 }, 30000);
 
 //druga tabela menjamo samo polja u tabeli
@@ -539,3 +544,32 @@ const interval = setInterval(() => {
     fetchDataKap();
     fetchDataZsnbg();
 }, 30000);
+
+
+// Sensit
+const sensitTable = document.querySelector('#sensitTable');
+
+async function fetchSensitData() {
+    const fetchLink = "http://192.168.0.10:2021/get46finalSensit";
+    const data = await fetchApi(fetchLink);
+    // const sensitData = await data.json();
+    console.log(data);
+    createSensitTable(data);
+}
+fetchSensitData();
+
+function createSensitTable(data) {
+    data.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <th>${d.zoneShort}</th>
+        <td>${d.zoneName}</td>
+        <td>${d.lokacija}</td>
+        <td>${d.ZaDisplej1}</td>
+        <td>${d.ZaDisplej2}</td>
+        <td>${d.disp1opis}</td>
+        <td>${d.disp2opis}</td>
+        `;
+        sensitTable.appendChild(tr);
+    })
+}

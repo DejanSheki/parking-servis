@@ -14,13 +14,36 @@ html {
   margin: 1rem 0;
 }
 .container h1 {
-  margin: 50px 0;
+  margin: 30px 0;
 }
 h2 {
-  margin: 50px 0;
+  margin: 30px 0;
 }
 h3 {
   margin: 30px 0;
+}
+button {
+  background: rgb(245, 245, 245);
+  cursor: pointer;
+  padding: 0.3rem 0.8rem;
+  /* border-radius: 10px; */
+  box-shadow: 3px 3px 3px 0px rgb(10, 10, 10);
+  border: none;
+  font-family: "Roboto", sans-serif;
+}
+button:hover {
+  box-shadow: 0px 0px 0px 1px rgb(10, 10, 10);
+  transition: 0.2s ease;
+}
+.editBtn {
+  width: 70px;
+}
+
+select,
+input {
+  border: 1px solid #9b9b9b;
+  background: transparent;
+  height: 28px;
 }
 .remove {
   display: none !important;
@@ -48,34 +71,118 @@ nav a:hover {
   color: rgb(185, 185, 185);
   font-size: 1.2rem;
 }
+.dropdown #dropdown-btn,
+.dropdown #dropdown-btn-locations {
+  color: rgb(250, 249, 255);
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  font-family: "Roboto", sans-serif;
+  cursor: pointer;
+}
+.dropdown #dropdown-btn:hover,
+.dropdown #dropdown-btn-locations:hover {
+  color: rgb(234, 232, 253);
+  transform: translate(1px, 1px);
+}
+.item-list,
+.item-list-locations {
+  position: absolute;
+  display: none;
+  top: 53px;
+  background: rgb(1, 1, 22);
+  padding: 1rem;
+  line-height: 1.5;
+  z-index: 1;
+}
+.item-list a,
+.item-list-locations a {
+  display: block;
+  font-size: 1.2rem;
+}
+.display {
+  display: block;
+}
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
 
 /* Tabele */
+
+.table-locations {
+  flex: 0 0 60%;
+}
+.table-locations th {
+  font-size: 0.9rem;
+}
+.table-locations th:nth-child(1) {
+  width: 70px;
+}
+.table-locations td:nth-child(2) {
+  width: 210px;
+  font-size: 0.9rem;
+}
+.table-locations td:nth-child(3),
+.table-locations td:nth-child(4),
+.table-locations td:nth-child(5),
+.table-locations td:nth-child(6) {
+  width: 75px;
+}
+.table-locations td:nth-child(7) {
+  width: 160px;
+}
 .table {
   margin: 0 auto;
   width: 100%;
+  font-size: 0.9rem;
 }
-thead {
-  border-top: 1px solid #e1e1e1;
-}
-tbody tr:nth-child(odd) {
-  background: #e1e1e1;
-}
+table,
+th,
 td {
-  padding: 8px;
+  border: 1px solid rgb(210, 207, 207);
+}
+th,
+td {
+  padding: 8px 7px;
+}
+tr:hover {
+  background: rgb(243, 243, 245);
+}
+.table-sensit td:nth-child(6),
+.table-sensit td:nth-child(7) {
+  width: 120px;
+}
+/* td:nth-child(2) {
+  width: 200px;
+}
+td:nth-child(4) {
+  width: 200px;
+} */
+td:nth-child(10) {
+  width: 370px;
+  overflow-x: scroll;
+  display: block;
 }
 .prom {
   width: 50px;
 }
+
 /* Statistika */
 section {
   display: flex;
   justify-content: space-between;
-  margin: 2.2rem 1.2rem;
 }
 .grafikon {
   width: 45%;
 }
-@media (max-width: 800px) {
+@media (max-width: 1200px) {
   section {
     flex-direction: column;
   }
@@ -91,50 +198,77 @@ section {
   align-items: center;
 }
 
-.insert-user {
-  margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* locations */
+
+.edit-container,
+.insert-location,
+.insert-user,
+.insert-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(55, 56, 70, 0.37);
+  display: none;
   justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  height: 100%;
 }
-.insert-user h3 {
-  margin: 0;
-  font-size: 1.5rem;
+.edit-container-show {
+  display: flex !important;
 }
-.insert-form {
+.edit-location-input,
+.insert-location-input,
+.insert-form,
+.insert-zone-input {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   width: 50%;
   padding: 2rem;
-  background: rgba(8, 11, 179, 0.918);
-  color: rgb(233, 232, 240);
-  border-radius: 20px;
-  box-shadow: 0px 0px 13px 1px black;
-  /* transform: rotateX(90deg); */
-  transition: ease 1s;
+  margin: auto;
+  background: rgb(250, 250, 255);
+  overflow-y: scroll;
+  top: 50px;
+  bottom: 0;
 }
-.insert-form form {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.edit-location-input {
+  height: 100%;
 }
-.insert-form :is(input, label, select, button) {
-  width: 50%;
-  border: none;
-  padding: 0.5rem;
-  font-size: 1.2rem;
-  border-radius: 10px;
-  color: hsl(0, 0%, 4%);
+.insert-location-input,
+.insert-form,
+.insert-zone-input {
+  overflow-y: auto;
 }
-.insert-form label {
-  margin: 0;
-  color: rgb(233, 232, 240);
+.edit-location-input label,
+.insert-location-input label,
+.insert-form label,
+.insert-zone-input label {
+  flex: 0 0 35%;
 }
-.insert-form button {
-  margin-top: 1rem;
+.edit-location-input input,
+.insert-location-input input,
+.insert-form input,
+.insert-zone-input input {
+  flex: 0 0 60%;
+  height: 28px;
+  margin: 0 0 5px 5px;
+  padding-left: 5px;
 }
-.insert-form button:hover {
+.insert-form select,
+.insert-location-input select,
+.edit-location-input select {
+  flex: 0 0 60%;
+  height: 28px;
+  margin: 0 0 5px 5px;
+  overflow: scroll;
+}
+.edit-location-input button,
+.insert-location-input button,
+.insert-form button,
+.insert-zone-input button {
+  width: 40%;
+  margin: 30px auto auto;
   cursor: pointer;
-  background: rgb(233, 232, 240);
-  box-shadow: 0px 0px 13px 1px black;
 }
