@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 // const email = require('./email');
-const net = require('./net-ceo');
+const net = require('./net-ceo2');
 const fs = require('fs');
 dotenv.config();
 
@@ -44,6 +44,9 @@ app.get('/02zones', (request, response) => {
 app.get('/test', (request, response) => {
     response.sendFile(path.join(__dirname, '../public/test.html'));
 });
+app.get('/test2', (request, response) => {
+    response.sendFile(path.join(__dirname, '../public/test2.html'));
+});
 
 // get db data
 app.get('/getAllActiveUsers', (request, response) => {
@@ -80,6 +83,13 @@ app.patch('/getLocationsDataByID', (request, response) => {
     const locID = request.body;
     const db = dbService.getDbServiceInstance();
     const result = db.getLocationsDataByID(locID.locID);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
+// sensit data
+app.get('/get46finalSensit', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    const result = db.get46finalSensit();
     result.then(data => response.json(data))
         .catch(err => console.log(err));
 });
@@ -138,11 +148,21 @@ app.post('/login', (request, response) => {
 });
 // update 
 app.patch('/updateTest', (request, response) => {
-    const { a1, a2, a3, a4, a5, a6, a7, a8, a9 } = request.body;
-    const upTest = `${a1}, ${a2}, ${a3}, ${a4}, ${a5}, ${a6}, ${a7}, ${a8}, ${a9}`;
+    const { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 } = request.body;
+    const upTest = `${a1}, ${a2}, ${a3}, ${a4}, ${a5}, ${a6}, ${a7}, ${a8}, ${a9}, ${a9}, ${a10}`;
     console.log(upTest.replace(/\s/g, '').toString());
     const db = dbService.getDbServiceInstance();
     const result = db.updateTest(upTest.replace(/\s/g, '').toString());
+    result
+        .then(data => response.json({ success: data }))
+        .catch(err => console.log(err));
+});
+app.patch('/updateTest2', (request, response) => {
+    const { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14 } = request.body;
+    const upTest = `${a1}, ${a2}, ${a3}, ${a4}, ${a5}, ${a6}, ${a7}, ${a8}, ${a9}, ${a10}, ${a11}, ${a12}, ${a13}, ${a14}`;
+    console.log(upTest.replace(/\s/g, '').toString());
+    const db = dbService.getDbServiceInstance();
+    const result = db.updateTest2(upTest.replace(/\s/g, '').toString());
     result
         .then(data => response.json({ success: data }))
         .catch(err => console.log(err));

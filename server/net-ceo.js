@@ -12,7 +12,8 @@ const server = net.createServer((socket) => {
         // insert last packet in log file
         const lastPacket = podaciSaTable[0];
         const datum = new Date().toLocaleString('sr');
-        const lastPacketFile = `${datum}: ${lastPacket} \n`
+        const IP = socket.remoteAddress.replace('::ffff:', '');
+        const lastPacketFile = `Date: ${datum} IP: ${IP} \n ${lastPacket} \n`
         const file = FileService.getFileServiceInstance();
         const result = file.logFile(lastPacketFile);
         result
@@ -76,19 +77,20 @@ const server = net.createServer((socket) => {
                     .then(data => {
                         const dataSplit = data[0].package.split(',');
                         let objSlanje = {
-                            displej1: dataSplit[0],
-                            displej2: dataSplit[1],
-                            displej3: dataSplit[2],
-                            displej4: dataSplit[3],
-                            osvetljenjeHi: dataSplit[4],
-                            osvetljenjeLo: dataSplit[5],
-                            accuCutOff: dataSplit[6],
-                            testTimerSec: dataSplit[7],
-                            test: dataSplit[8],
+                            adresa: dataSplit[0],
+                            displej1: dataSplit[1],
+                            displej2: dataSplit[2],
+                            displej3: dataSplit[3],
+                            displej4: dataSplit[4],
+                            osvetljenjeHi: dataSplit[5],
+                            osvetljenjeLo: dataSplit[6],
+                            accuCutOff: dataSplit[7],
+                            testTimerSec: dataSplit[8],
+                            test: dataSplit[9],
                         }
                         console.log(objSlanje);
                         const objSlanjeCheck = Object.assign(objSlanje, {
-                            checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                            checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
                             // checksum: crcData
                         });
                         // console.log(objSlanjeCheck);
@@ -107,40 +109,41 @@ const server = net.createServer((socket) => {
                         displayData.locDisp2zoneID = data[0].locDisp2zoneID;
                         displayData.locDisp3zoneID = data[0].locDisp3zoneID;
                         displayData.locDisp4zoneID = data[0].locDisp4zoneID;
-
                         const db = dbService.getDbServiceInstance();
                         const dbResult = db.getZoneDataByID(displayData.locDisp1zoneID, displayData.locDisp2zoneID, displayData.locDisp3zoneID, displayData.locDisp4zoneID);
                         dbResult
                             .then(data => {
+                                console.log(data);
                                 const displej1 = () => {
-                                    if (data.find(dat => dat.zoneID === displayData.locDisp1zoneID) !== undefined) {
-                                        return data.find(dat => dat.zoneID === displayData.locDisp1zoneID).zoneFreeNow;
-                                    } else {
+                                    if (data.find(dat => dat.zoneShort === displayData.locDisp1zoneID) === undefined) {
                                         return '000';
+                                    } else {
+                                        return data.find(dat => dat.zoneShort === displayData.locDisp1zoneID).zoneFreeNow;
                                     }
                                 }
                                 const displej2 = () => {
-                                    if (data.find(dat => dat.zoneID === displayData.locDisp2zoneID) !== undefined) {
-                                        return data.find(dat => dat.zoneID === displayData.locDisp2zoneID).zoneFreeNow;
-                                    } else {
+                                    if (data.find(dat => dat.zoneShort === displayData.locDisp2zoneID) === undefined) {
                                         return '000';
+                                    } else {
+                                        return data.find(dat => dat.zoneShort === displayData.locDisp2zoneID).zoneFreeNow;
                                     }
                                 }
                                 const displej3 = () => {
-                                    if (data.find(dat => dat.zoneID === displayData.locDisp3zoneID) !== undefined) {
-                                        return data.find(dat => dat.zoneID === displayData.locDisp3zoneID).zoneFreeNow;
-                                    } else {
+                                    if (data.find(dat => dat.zoneShort === displayData.locDisp3zoneID) === undefined) {
                                         return '000';
+                                    } else {
+                                        return data.find(dat => dat.zoneShort === displayData.locDisp3zoneID).zoneFreeNow;
                                     }
                                 }
                                 const displej4 = () => {
-                                    if (data.find(dat => dat.zoneID === displayData.locDisp4zoneID) !== undefined) {
-                                        return data.find(dat => dat.zoneID === displayData.locDisp4zoneID).zoneFreeNow;
-                                    } else {
+                                    if (data.find(dat => dat.zoneShort === displayData.locDisp4zoneID) === undefined) {
                                         return '000';
+                                    } else {
+                                        return data.find(dat => dat.zoneShort === displayData.locDisp4zoneID).zoneFreeNow;
                                     }
                                 }
                                 let objSlanje = {
+                                    adresa: objTabla.adresa,
                                     displej1: displej1(),
                                     displej2: displej2(),
                                     displej3: displej3(),
@@ -153,7 +156,7 @@ const server = net.createServer((socket) => {
                                 }
                                 console.log(objSlanje);
                                 const objSlanjeCheck = Object.assign(objSlanje, {
-                                    checksum: CRC.ToCRC16(`${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                                    checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej2},${objSlanje.displej3},${objSlanje.displej4},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
                                 });
                                 socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                                 socket.end();

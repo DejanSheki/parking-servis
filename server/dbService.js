@@ -275,7 +275,7 @@ class DbService {
     async updateLocatiOnLastPacket(lastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "UPDATE 03locations SET locLastPacket = ?, locDisp1value = ?, locDisp2value =?, locDisp3value = ?, locDisp4value = ?, locLastCommTD = CURRENT_TIMESTAMP WHERE locNumber = ?";
+                const query = "UPDATE 03locations SET locLastPacket = ?, locDisp1value = ?, locDisp2value =?, locDisp3value = ?, locDisp4value = ?, locLastCommTD = CURRENT_TIMESTAMP WHERE locNumber = ? and locType = 1";
                 connection.query(query, [lastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
@@ -336,7 +336,7 @@ class DbService {
     async getZoneDataByID(locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT zoneFreeNow, zoneID FROM 02zones WHERE zoneID IN (?,?,?,?);";
+                const query = "SELECT zoneFreeNow, zoneShort FROM 02zones WHERE zoneShort IN (?,?,?,?);";
                 connection.query(query, [locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID], (err, results) => {
                     if (err) reject(new Error(err.message));
                     resolve(results);
@@ -380,7 +380,7 @@ class DbService {
     async sensitFree(bay, zone, lot) {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "INSERT INTO 24nedapJSON (bay, zone, lot) VALUE (?,?,?)";
+                const query = "INSERT INTO 24nedapjson (bay, zone, lot) VALUE (?,?,?)";
                 connection.query(query, [bay, zone, lot], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result.affectedRows);
@@ -408,7 +408,7 @@ class DbService {
     async create33dispSum1() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 33dispSum1 SELECT 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, SUM(31lotzonesum.ukupno * 23time.`sign+1-1`) AS ZaDisplej1, 0 AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM((21locationsS INNER JOIN 22display ON 21locationsS.Slokacija = 22display.lokacija) INNER JOIN 23time ON 22display.dispID = 23time.IDdisp) INNER JOIN 31lotZoneSum ON(23time.lot = 31lotZoneSum.lot) AND(23time.zone = 31lotZoneSum.zone) WHERE(((23time.`disp1-2`) = 1) AND((23time.vremeOd) <= CURRENT_TIME) AND((23time.vremeDo) >= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 22display.disp1tip, 22display.disp2tip";
+                const query = "CREATE TABLE 33dispsum1 SELECT 22display.dispID, 22display.zoneShort, 22display.lokacija, 22display.disp1opis, 22display.disp2opis, 21locationss.SlocOpisLokacije, SUM(31lotzonesum.ukupno * 23time.`sign+1-1`) AS ZaDisplej1, 0 AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM((21locationss INNER JOIN 22display ON 21locationss.Slokacija = 22display.lokacija) INNER JOIN 23time ON 22display.dispID = 23time.IDdisp) INNER JOIN 31lotzonesum ON(23time.lot = 31lotzonesum.lot) AND(23time.zone = 31lotzonesum.zone) WHERE(((23time.`disp1-2`) = 1) AND((23time.vremeOd) <= CURRENT_TIME) AND((23time.vremeDo) >= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije, 22display.disp1opis, 22display.disp2opis, 22display.disp1tip, 22display.disp2tip";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -423,7 +423,7 @@ class DbService {
     async create34dispSum2() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 34dispSum2 SELECT 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 0 AS ZaDisplej1, Sum(31lotZoneSum.Ukupno*23time.`sign+1-1`) AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationsS INNER JOIN 22display ON 21locationsS.Slokacija = 22display.lokacija) INNER JOIN 23time ON 22display.dispID = 23time.IDdisp) INNER JOIN 31lotZoneSum ON (23time.Lot = 31lotZoneSum.Lot) AND (23time.Zone = 31lotZoneSum.Zone) WHERE (((23time.`disp1-2`)=2) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 22display.disp1tip, 22display.disp2tip";
+                const query = "CREATE TABLE 34dispsum2 SELECT 22display.dispID, 22display.zoneShort, 22display.lokacija, 22display.disp1opis, 22display.disp2opis, 21locationss.SlocOpisLokacije, 0 AS ZaDisplej1, Sum(31lotzonesum.Ukupno*23time.`sign+1-1`) AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationss INNER JOIN 22display ON 21locationss.Slokacija = 22display.lokacija) INNER JOIN 23time ON 22display.dispID = 23time.IDdisp) INNER JOIN 31lotzonesum ON (23time.Lot = 31lotzonesum.Lot) AND (23time.Zone = 31lotzonesum.Zone) WHERE (((23time.`disp1-2`)=2) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije, 22display.disp1opis, 22display.disp2opis,  22display.disp1tip, 22display.disp2tip";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -438,7 +438,7 @@ class DbService {
     async create35unionSum() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 35unijaSum SELECT * FROM 33dispSum1 UNION ALL SELECT * FROM 34dispSum2;";
+                const query = "CREATE TABLE 35unijasum SELECT * FROM 33dispsum1 UNION ALL SELECT * FROM 34dispsum2;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -453,7 +453,7 @@ class DbService {
     async create36unionSum() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 36unijaSum SELECT 35unijaSum.dispID, 35unijaSum.oznaka, 35unijaSum.lokacija, 35unijaSum.SlocOpisLokacije, Sum(35unijaSum.ZaDisplej1) AS ZaDisplej1, Sum(35unijaSum.ZaDisplej2) AS ZaDisplej2, 35unijaSum.disp1tip, 35unijaSum.disp2tip FROM 35unijaSum GROUP BY 35unijaSum.dispID, 35unijaSum.oznaka, 35unijaSum.lokacija, 35unijaSum.SlocOpisLokacije, 35unijaSum.disp1tip, 35unijaSum.disp2tip;";
+                const query = "CREATE TABLE 36unijasum SELECT 35unijasum.dispID, 35unijasum.zoneShort, 35unijasum.lokacija, 35unijasum.SlocOpisLokacije, 35unijasum.disp1opis, 35unijasum.disp2opis, Sum(35unijasum.ZaDisplej1) AS ZaDisplej1, Sum(35unijasum.ZaDisplej2) AS ZaDisplej2, 35unijasum.disp1tip, 35unijasum.disp2tip FROM 35unijasum GROUP BY 35unijasum.dispID, 35unijasum.zoneShort, 35unijasum.lokacija, 35unijasum.SlocOpisLokacije, 35unijasum.disp1opis, 35unijasum.disp2opis, 35unijasum.disp1tip, 35unijasum.disp2tip;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -468,7 +468,7 @@ class DbService {
     async create43dispSum1All() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 43dispSum1All SELECT 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, Sum(COALESCE(31lotZoneSum.Ukupno)*COALESCE(23time.`sign+1-1`)) AS ZaDisplej1, 0 AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationsS INNER JOIN 22display ON 21locationsS.Slokacija = 22display.lokacija) LEFT JOIN 23time ON 22display.dispID = 23time.IDdisp) LEFT JOIN 31lotZoneSum ON (23time.Lot = 31lotZoneSum.Lot) AND (23time.Zone = 31lotZoneSum.Zone) WHERE (((23time.`disp1-2`)=1) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 22display.disp1tip, 22display.disp2tip;";
+                const query = "CREATE TABLE 43dispsum1all SELECT 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije, 22display.disp1opis, 22display.disp2opis,  Sum(COALESCE(31lotzonesum.Ukupno)*COALESCE(23time.`sign+1-1`)) AS ZaDisplej1, 0 AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationss INNER JOIN 22display ON 21locationss.Slokacija = 22display.lokacija) LEFT JOIN 23time ON 22display.dispID = 23time.IDdisp) LEFT JOIN 31lotzonesum ON (23time.Lot = 31lotzonesum.Lot) AND (23time.Zone = 31lotzonesum.Zone) WHERE (((23time.`disp1-2`)=1) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije,22display.disp1opis, 22display.disp2opis,  22display.disp1tip, 22display.disp2tip;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -483,7 +483,7 @@ class DbService {
     async create44dispSum2All() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 44dispSum2All SELECT 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 0 AS ZaDisplej1, Sum(COALESCE(31lotZoneSum.Ukupno)*COALESCE(23time.`sign+1-1`)) AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationsS INNER JOIN 22display ON 21locationsS.Slokacija = 22display.lokacija) LEFT JOIN 23time ON 22display.dispID = 23time.IDdisp) LEFT JOIN 31lotZoneSum ON (23time.Zone = 31lotZoneSum.Zone) AND (23time.Lot = 31lotZoneSum.Lot) WHERE (((23time.`disp1-2`)=2) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.oznaka, 22display.lokacija, 21locationsS.SlocOpisLokacije, 22display.disp1tip, 22display.disp2tip;;";
+                const query = "CREATE TABLE 44dispsum2all SELECT 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije, 22display.disp1opis, 22display.disp2opis, 0 AS ZaDisplej1, Sum(COALESCE(31lotzonesum.Ukupno)*COALESCE(23time.`sign+1-1`)) AS ZaDisplej2, 22display.disp1tip, 22display.disp2tip FROM ((21locationss INNER JOIN 22display ON 21locationss.Slokacija = 22display.lokacija) LEFT JOIN 23time ON 22display.dispID = 23time.IDdisp) LEFT JOIN 31lotzonesum ON (23time.Zone = 31lotzonesum.Zone) AND (23time.Lot = 31lotzonesum.Lot) WHERE (((23time.`disp1-2`)=2) AND ((23time.vremeOd)<= CURRENT_TIME) AND ((23time.vremeDo)>= CURRENT_TIME)) GROUP BY 22display.dispID, 22display.zoneShort, 22display.lokacija, 21locationss.SlocOpisLokacije, 22display.disp1opis, 22display.disp2opis, 22display.disp1tip, 22display.disp2tip;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -498,7 +498,7 @@ class DbService {
     async create45unijaSumAll() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 45unijaSumAll SELECT * FROM 43dispSum1all UNION ALL SELECT * FROM 44dispSum2all;";
+                const query = "CREATE TABLE 45unijasumall SELECT * FROM 43dispsum1all UNION ALL SELECT * FROM 44dispsum2all;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -513,7 +513,7 @@ class DbService {
     async create46groupSumAll() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "CREATE TABLE 46groupSumAll SELECT 45unijaSumAll.dispID, 45unijaSumAll.oznaka, 45unijaSumAll.lokacija, 45unijaSumAll.SlocOpisLokacije, Sum(45unijaSumAll.ZaDisplej1) AS ZaDisplej1, Sum(45unijaSumAll.ZaDisplej2) AS ZaDisplej2, 45unijaSumAll.disp1tip, 45unijaSumAll.disp2tip FROM 45unijaSumAll GROUP BY 45unijaSumAll.dispID, 45unijaSumAll.oznaka, 45unijaSumAll.lokacija, 45unijaSumAll.SlocOpisLokacije, 45unijaSumAll.disp1tip, 45unijaSumAll.disp2tip;";
+                const query = "CREATE TABLE 46groupsumall SELECT 45unijasumall.dispID, 45unijasumall.zoneShort, 45unijasumall.lokacija, 45unijasumall.SlocOpisLokacije, 45unijasumall.disp1opis, 45unijasumall.disp2opis, Sum(45unijasumall.ZaDisplej1) AS ZaDisplej1, Sum(45unijasumall.ZaDisplej2) AS ZaDisplej2, 45unijasumall.disp1tip, 45unijasumall.disp2tip FROM 45unijasumall GROUP BY 45unijasumall.dispID, 45unijasumall.zoneShort, 45unijasumall.lokacija, 45unijasumall.SlocOpisLokacije, 45unijasumall.disp1opis, 45unijasumall.disp2opis, 45unijasumall.disp1tip, 45unijasumall.disp2tip;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -525,10 +525,102 @@ class DbService {
             return false;
         }
     }
+    async get46groupSumAllData() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 46groupsumall;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async update46final(zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                // const query = "UPDATE 46final SET zoneShort = ?, lokacija = ?, zoneName = ?, disp1opis = ?, disp2opis = ?, ZaDisplej1 = ?, ZaDisplej2 = ?, disp1tip = ?, disp2tip = ? WHERE dispID = ?;";
+                const query = "INSERT INTO 46final (zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE zoneShort = VALUES(zoneShort), lokacija = VALUES(lokacija), zoneName = VALUES(zoneName), disp1opis = VALUES(disp1opis), disp2opis = VALUES(disp2opis), ZaDisplej1 = VALUES(ZaDisplej1), ZaDisplej2 = VALUES(ZaDisplej2), disp1tip = VALUES(disp1tip), disp2tip = VALUES(disp2tip);";
+                connection.query(query, [zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async get46finalSensit() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 46final ORDER BY zoneShort;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async getSensitDataByDisplayID(locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 46final WHERE zoneShort IN (?,?,?,?);";
+                connection.query(query, [locDisp1zoneID, locDisp2zoneID, locDisp3zoneID, locDisp4zoneID], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+            // console.log(response);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async getSensitDataByLocNumber(locNumber) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 03locations WHERE locNumber = ? AND locType = 2";
+                connection.query(query, [locNumber], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+            // console.log(response);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async updateSensitOnLastPacket(sensitLastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE 03locations SET locLastPacket = ?, locDisp1value = ?, locDisp2value = ?, locDisp3value = ?, locDisp4value = ?, locLastCommTD = CURRENT_TIMESTAMP WHERE locNumber = ? and locType = 2";
+                connection.query(query, [sensitLastPacket, locDisp1value, locDisp2value, locDisp3value, locDisp4value, locNumber], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            // console.log(response);
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
     async deleteFromSensitFree() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "DELETE FROM 24nedapJSON";
+                const query = "DELETE FROM 24nedapjson";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -543,7 +635,7 @@ class DbService {
     async dropSumTables() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "DROP TABLE 31lotzonesum, 33dispSum1, 34dispSum2, 35unijaSum, 36unijaSum, 43dispSum1All, 44dispSum2All, 45unijaSumAll, 46groupSumAll";
+                const query = "DROP TABLE 31lotzonesum, 33dispsum1, 34dispsum2, 35unijasum, 36unijasum, 43dispsum1all, 44dispsum2all, 45unijasumall, 46groupsumall";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -575,6 +667,36 @@ class DbService {
         try {
             const response = await new Promise((resolve, reject) => {
                 const query = "SELECT * FROM packagetest WHERE id = 2;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async updateTest2(upTest) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE packagetest2 SET package = ? WHERE id = 1";
+                connection.query(query, [upTest], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result.affectedRows);
+                })
+            });
+            return response === 1 ? true : false;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async getTest2() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM packagetest2 WHERE id = 1;";
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
