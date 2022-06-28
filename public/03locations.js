@@ -365,9 +365,9 @@ function createOptions(dbData) {
     const locDisp4 = document.querySelector('#display4options');
     const data = [...dbData[1], ...dbData[3]]
     data.forEach(dat => {
-        locDisp1.add(new Option(dat.zoneName, dat.zoneShort));
-        locDisp2.add(new Option(dat.zoneName, dat.zoneShort));
-        locDisp3.add(new Option(dat.zoneName, dat.zoneShort));
-        locDisp4.add(new Option(dat.zoneName, dat.zoneShort));
+        locDisp1.add(new Option(dat.zoneShort, dat.zoneShort));
+        locDisp2.add(new Option(dat.zoneShort, dat.zoneShort));
+        locDisp3.add(new Option(dat.zoneShort, dat.zoneShort));
+        locDisp4.add(new Option(dat.zoneShort, dat.zoneShort));
     })
 }

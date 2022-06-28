@@ -153,11 +153,15 @@ td {
   padding: 8px 7px;
 }
 tr:hover {
-  background: rgb(243, 243, 245);
+  background: rgb(243, 243, 245) !important;
 }
 .table-sensit td:nth-child(6),
 .table-sensit td:nth-child(7) {
   width: 120px;
+}
+table i {
+  color: rgb(75, 75, 75);
+  font-size: 0.8rem;
 }
 /* td:nth-child(2) {
   width: 200px;
@@ -165,6 +169,9 @@ tr:hover {
 td:nth-child(4) {
   width: 200px;
 } */
+#table1 td:nth-child(8) {
+  font-size: 0.8rem;
+}
 td:nth-child(10) {
   width: 370px;
   overflow-x: scroll;
