@@ -90,7 +90,7 @@ class DbService {
     async getAllActiveLocations() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM 03locations WHERE locActive=1;";
+                const query = "SELECT * FROM 03locations WHERE locActive=1 ORDER BY locID;";
                 connection.query(query, (err, results) => {
                     if (err) reject(new Error(err.message));
                     resolve(results);
@@ -645,6 +645,80 @@ class DbService {
         } catch (error) {
             console.log(error);
             return false;
+        }
+    }
+    // last communication
+    async lastCommunication() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT locID, locLname, locLastCommTD FROM 03locations;"
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async updateLastCommunication(locColor, locID) {
+        try {
+            const insertZone = await new Promise((resolve, reject) => {
+                const query = "UPDATE 03locations SET locColor = ? WHERE locID = ?";
+                connection.query(query, [locColor, locID], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            // console.log(insertZone);
+            return insertZone;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async lastCommunicationMail() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT locID, locLastCommTD, locLastPacket, locType, locSname FROM 03locations;"
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async insertEvents(eventName, eventDesc) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "INSERT INTO 04events (eventName, eventDesc) VALUES (?,?)";
+                connection.query(query, [eventName, eventDesc], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async selectEvents() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 04events";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
         }
     }
     //test

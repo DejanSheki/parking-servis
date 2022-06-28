@@ -17,6 +17,7 @@
     "express": "^4.17.3",
     "ftp": "^0.3.10",
     "mysql": "^2.18.1",
+    "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.2"
   },
   "devDependencies": {

@@ -35,10 +35,20 @@ async function fetchDataL11ToL22() {
         headers: headers
     });
     const sensitData = await data.json();
-    // console.log(sensitData);
     lot11To22(sensitData)
 }
 fetchDataL11ToL22();
+
+async function fetchDataL23ToL34() {
+    const data = await fetch(`https://belgrade4.nedapparking.com/api/v1/parkingLots?expand=bays`, {
+        headers: headers
+    });
+    const sensitData = await data.json();
+    lot23To34(sensitData)
+}
+fetchDataL23ToL34();
+
+
 
 function lot1To6(sensitData) {
     const lot1 = sensitData.find(d => d.name === 'LOT1');
@@ -231,6 +241,92 @@ function lot11To22(sensitData) {
         db.sensitFree(b.id, b.zone.id, 22);
     });
 }
+function lot23To34(sensitData) {
+    const lot23 = sensitData.find(d => d.name === 'Parking lot 23');
+    const baysL23 = lot23.bays.filter(d => d.state === 'Free');
+    baysL23.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot11`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 23);
+    });
+    const lot24 = sensitData.find(d => d.name === 'Parking lot 24');
+    const baysL24 = lot24.bays.filter(d => d.state === 'Free');
+    baysL24.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot12`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 24);
+    });
+    const lot25 = sensitData.find(d => d.name === 'Parking lot 25');
+    const baysL25 = lot25.bays.filter(d => d.state === 'Free');
+    baysL25.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot13`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 25);
+    });
+    const lot26 = sensitData.find(d => d.name === 'Parking lot 26');
+    const baysL26 = lot26.bays.filter(d => d.state === 'Free');
+    baysL26.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot14`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 26);
+    });
+    const lot27 = sensitData.find(d => d.name === 'Parking lot 27');
+    const baysL27 = lot27.bays.filter(d => d.state === 'Free');
+    baysL27.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot15`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 27);
+    });
+    const lot28 = sensitData.find(d => d.name === 'Parking lot 28');
+    const baysL28 = lot28.bays.filter(d => d.state === 'Free');
+    baysL28.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot16`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 28);
+    });
+    const lot29 = sensitData.find(d => d.name === 'Parking lot 29');
+    const baysL29 = lot29.bays.filter(d => d.state === 'Free');
+    baysL29.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot17`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 29);
+    });
+    const lot30 = sensitData.find(d => d.name === 'Parking lot 30');
+    const baysL30 = lot30.bays.filter(d => d.state === 'Free');
+    baysL30.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot18`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 30);
+    });
+    const lot31 = sensitData.find(d => d.name === 'Parking lot 31');
+    const baysL31 = lot31.bays.filter(d => d.state === 'Free');
+    baysL31.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot19`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 31);
+    });
+    const lot32 = sensitData.find(d => d.name === 'Parking lot 32');
+    const baysL32 = lot32.bays.filter(d => d.state === 'Free');
+    baysL32.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot20`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 32);
+    });
+    const lot33 = sensitData.find(d => d.name === 'Parking lot 33');
+    const baysL33 = lot33.bays.filter(d => d.state === 'Free');
+    baysL33.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot21`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 33);
+    });
+    const lot34 = sensitData.find(d => d.name === 'Parking lot 34');
+    const baysL34 = lot34.bays.filter(d => d.state === 'Free');
+    baysL34.forEach(b => {
+        // console.log(`Bay: ${b.id}, Zone: ${b.zone.id}, Lot22`);
+        const db = dbService.getDbServiceInstance();
+        db.sensitFree(b.id, b.zone.id, 34);
+    });
+}
 
 function createTables() {
     const db = dbService.getDbServiceInstance();
@@ -284,7 +380,7 @@ function createTables() {
                                                                                 .then(data => {
                                                                                     console.log(data);
                                                                                     data.forEach(d => {
-                                                                                        console.log(d.zoneShort);
+                                                                                        // console.log(d.zoneShort);
                                                                                         if (d.ZaDisplej1 === null) {
                                                                                             d.ZaDisplej1 = 0;
                                                                                         }
@@ -325,7 +421,7 @@ function dropTables() {
 
 setTimeout(() => {
     createTables();
-}, 1000);
+}, 5000);
 setTimeout(() => {
     dropTables();
 }, 30000);
@@ -334,15 +430,16 @@ setInterval(() => {
     fetchDataL1ToL6();
     fetchDataL7ToL10();
     fetchDataL11ToL22();
+    fetchDataL23ToL34();
     setTimeout(() => {
         createTables();
-    }, 1000);
+    }, 5000);
     setTimeout(() => {
         dropTables();
     }, 30000);
 }, 55000);
 
-// pokusaj 1
+// moj nacin
 // Promise.all([
 //     fetch(`https://belgrade.nedapparking.com/api/v1/parkingLots?expand=bays`, {
 //         headers: headers

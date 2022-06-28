@@ -6,13 +6,14 @@ const dbService = require('./dbService');
 let email;
 
 // useri iz baze
-async function dbUsers() {
-    const db = dbService.getDbServiceInstance();
-    const result = await db.getAllActiveUsers();
-    const data = JSON.stringify(result);
-    const usersData = JSON.parse(data);
-    return usersData;
-}
+// async function dbUsers() {
+//     const db = dbService.getDbServiceInstance();
+//     const result = await db.getAllActiveUsers();
+//     const data = JSON.stringify(result);
+//     const usersData = JSON.parse(data);
+//     console.log(usersData);
+//     return usersData;
+// }
 
 // datum iz baze, odvajamo sate i minute
 function date(userInfoTime) {
@@ -70,10 +71,10 @@ let transporter = nodemailer.createTransport({
 // samoRekap();
 
 // refres podataka
-let refresh = new cron.CronJob('25 04 * * *', () => {
-    samoRekap();
-});
-refresh.start();
+// let refresh = new cron.CronJob('25 04 * * *', () => {
+//     samoRekap();
+// });
+// refresh.start();
 
 
 //
@@ -86,26 +87,29 @@ class sendEmail {
     }
     async promeneNaTabli(sendingData) {
         try {
-            const usersData = await dbUsers();
+            // const usersData = await dbUsers();
             // console.log(usersData);
-            usersData.map((userData) => {
-                email = userData.userMail;
-                let zaSlanje = '';
-                zaSlanje += `<li>Podaci sa table:${sendingData.vrstaPaketa}, ${sendingData.brLokacije}, ${sendingData.displej1}, ${sendingData.displej2}, ${sendingData.displej3}, ${sendingData.displej4}, ${sendingData.temperaturaEl}, ${sendingData.osvetljenjeUokruzenju}, ${sendingData.temperaturaAku}, ${sendingData.naponAku}, ${sendingData.ICCIDbr}, ${sendingData.signalAntene}, ${sendingData.relejPozOsvetljenja}, ${sendingData.checksum}</li>`;
-                userData = transporter.sendMail({
-                    from: 'dejan.lukic@pinfo.rs',
-                    to: email,
-                    subject: `Svi podaci`,
-                    html: zaSlanje
-                }, function (err, info) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                        return info.response;
-                    }
-                })
+            // usersData.map((userData) => {
+            // email = userData.userMail;
+            let zaSlanje = '';
+            // zaSlanje += `<li>Podaci sa table:${sendingData.vrstaPaketa}</li>`;
+            zaSlanje = sendingData;
+            console.log(zaSlanje);
+            // userData = 
+            transporter.sendMail({
+                from: 'dejan.lukic@pinfo.rs',
+                to: 'dejan.sheki.lukic@gmail.com',
+                subject: `Svi podaci`,
+                text: zaSlanje
+            }, function (err, info) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    return info.response;
+                }
             })
+            // })
             // return usersData;
         }
         catch (error) {

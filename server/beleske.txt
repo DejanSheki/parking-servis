@@ -15,8 +15,28 @@
 
 
 // kopiranje WIN to LINUX
-pscp -r D:\Dejan\SDP_Control\02zones.sql root@192.168.0.10:/home/dejan/Desktop/parkingServis/node_express/server
+pscp -r D:\Dejan\DSP_Cntrol\parkingServis\node_express\server\net-ceo2.js root@192.168.42.42:/home/dejan/Desktop/parkingServis/node_express/server
 
-net use \\192.168.72.72\IPC$ /user:ZR20010 ZR20010 copy \\192.168.72.72\c$\newsys\transfer\PLS.008 c:\server01
-mount //192.168.81.81/c$/newsys/transfer/ /home/dejan/Desktop/parkingServis/node_express/server/objekti/bel -o username=ZR20010,password=ZR20010
+pscp -r root@192.168.42.42:/home/dejan/Desktop/parkingServis/node_express/server/log-file-sensit.log D:\Dejan\DSP_Cntrol\parkingServis\node_express\server 
 
+net use \\192.168.62.62\IPC$ /user:ZR20010 ZR20010 copy \\192.168.62.62\c$\newsys\transfer\PLS.008 c:\server01
+mount //192.168.62.62/c$/newsys/transfer/ & /home/dejan/Desktop/parkingServis/node_express/server/objekti/obi -o username=ZR20010,password=ZR20010
+
+ 
+mount -t cifs -o rw,username=ZR20010,password=ZR20010 //192.168.62.62/c$/newsys/transfer/ /home/dejan/Desktop/parkingServis/node_express/server/objekti/obi 
+
+// 
+ALTER TABLE 02zones Modify column zoneFreeNow INT(3) ZEROFILL;
+UPDATE 03locations SET locID = 132 WHERE locID = 100;
+
+// kopiranje baze/tabele
+mysqldump -u root -p parkingServis 02zones > /home/dejan/Desktop/parkingServis/node_express/server/02zones.sql
+
+
+source /home/dejan/Desktop/parkingServis/node_express/server/
+
+
+pscp -r D:\Dejan\DSP_Cntrol\23time.sql root@192.168.42.42:/home/dejan/Desktop/parkingServis/node_express/server
+
+VPN-travica
+VpRT2*73Ne

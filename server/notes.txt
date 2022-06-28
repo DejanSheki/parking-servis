@@ -1,0 +1,29 @@
+// - sto se tice sajta pozdravljam povecanje user/password polja na login stranici i pritisak enter-a za dalje //
+
+- na 'Pregled' stranici neka ID za P-INFO bandere bude P01-P88, a SENSIT S001-S137, mozda i da to polje bude 
+  (samo gde je ID) plavo za P-INFO, a braon za SENSIT kako bi ih razlikovali medjusobno, 
+// - takodje na 'Pregled' stranici dodaj polje 'Napomena' iza 'Zadnjeg javljanja' (pa skupi sve ostale po malo) gde
+  cemo dodati znak za jacinu signala, svetlo za backlight, brojace reseta itd... //
+// - da li moze ova crvena za 100% popunjenost da bude samo malo slabija jer se tesko vide crna slova na njoj ? //
+
+// - na stranici 'Korisnici' SSuperAdmin-i tj. ti i ja ne treba da se vidimo, samo oni koje dalje unosimo, 
+  prepisi   sa starog sajta sve ostale korisnike, telefone izbaci, a kao sifre stavi 1234 pa nek sami menjaju, //
+// - kada je izabrana stranica 'Korisnici' u pretrazivacu pored ikonice P stoji Krisnici !!! //
+
+//- na stranici 'Uredjaji' unos novog je OK samo treba na mestu vrsta uredjaja da bude meni za izbor 1/2 (ovo mozes
+  postaviti u polju kao zakucan izbor), //
+- izmena kod 'Uredjaja' treba da bude drugacija:
+  // - ID treba da bude fiksan, da se samo vidi, ali da se nemoze pisati u tom polju,//
+  // - model - isko kao kod novog uredjaja, izbor izmedju 1=P-INFO i 2 =SENSIT, //
+  - Displej 1 ID objekta - treba samo da stoji Displej 1, a mi iz menija da biramo ID preko naziva i skracenica objekata,
+  - Displej 2,3,4 ID objekta - isto kao Displej 1 ID objekta
+  // - Displej 1,2,3,4 ne treba da se prikazuju jer su to polja koja se dinamicki menjaju i sluze za laksi prikaz u 'pregledu' //
+  // - Aktivna/Neaktivna - ne treba da se vidi, jer ako je neko obrisao nece se vise nigde videti, ostaje samo za nas i statistike //
+  - ID korisnika - treba da stoji kreirao i ime korisnika,
+  // - Enejblovana/disejblovana - treba da stoji: Privremeno iskljucena i izbor izmedju ta dva 0=radi, 1=iskljucena, a ne broj //
+  - ID korisnika koji je disejblovao - treba da stoji: Iskljucna od strane: pa ime korisnika (a u tabeli je samo ID)
+  // - Vreme i Opis dijeblovanja treba da stoji: Vreme i Opis privremenog iskljucenja, //
+  - Event Mask treba da bude stikla umesto brojeva, a kad je True ili =1 nece se obradjivati, ali ce ici u istoriju desavnja
+  // - Poslednje javljanje i paket i boja ne treba da se vide ovde jer su dinamicka polja, //
+  // - pretpostavljam da je Boja br. 2 u stvari napomena koja takodje ne treba da se vidi jer je dinamicka //
+- i naravno izmene na nivou modela ne rade, u stvari komplet izmene ne prihvata,

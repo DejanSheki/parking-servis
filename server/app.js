@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-// const email = require('./email');
+const email = require('./email');
 const net = require('./net-ceo2');
 const fs = require('fs');
 dotenv.config();

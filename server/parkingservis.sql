@@ -7,10 +7,13 @@
 -- Server version: 5.7.24
 -- PHP Version: 7.4.1
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
+SET SQL_MODE
+= "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT
+= 0;
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone
+= "+00:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -28,18 +31,37 @@ SET time_zone = "+00:00";
 -- Table structure for table `01users`
 --
 
-CREATE TABLE `01users` (
-  `userID` int(6) NOT NULL,
-  `userName` varchar(30) CHARACTER SET ascii NOT NULL,
-  `userPassw` varchar(30) CHARACTER SET ascii NOT NULL,
-  `userFLname` varchar(50) NOT NULL,
-  `userRank` int(1) NOT NULL,
-  `userTitle` varchar(30) CHARACTER SET ascii NOT NULL,
-  `userMail` varchar(50) CHARACTER SET ascii NOT NULL,
-  `userInfoType` int(1) NOT NULL,
+CREATE TABLE `01users`
+(
+  `userID` int
+(6) NOT NULL,
+  `userName` varchar
+(30) CHARACTER
+SET ascii
+NOT NULL,
+  `userPassw` varchar
+(30) CHARACTER
+SET ascii
+NOT NULL,
+  `userFLname` varchar
+(50) NOT NULL,
+  `userRank` int
+(1) NOT NULL,
+  `userTitle` varchar
+(30) CHARACTER
+SET ascii
+NOT NULL,
+  `userMail` varchar
+(50) CHARACTER
+SET ascii
+NOT NULL,
+  `userInfoType` int
+(1) NOT NULL,
   `userInfoTime` time NOT NULL,
-  `userActive` int(1) NOT NULL DEFAULT '1',
-  `userCreatedByID` int(6) NOT NULL,
+  `userActive` int
+(1) NOT NULL DEFAULT '1',
+  `userCreatedByID` int
+(6) NOT NULL,
   `userCreatedTD` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -47,7 +69,12 @@ CREATE TABLE `01users` (
 -- Dumping data for table `01users`
 --
 
-INSERT INTO `01users` (`userID`, `userName`, `userPassw`, `userFLname`, `userRank`, `userTitle`, `userMail`, `userInfoType`, `userInfoTime`, `userActive`, `userCreatedByID`, `userCreatedTD`) VALUES
+INSERT INTO `01users` (`
+userID`,
+`userName`,
+`userPassw`,
+`userFLname
+`, `userRank`, `userTitle`, `userMail`, `userInfoType`, `userInfoTime`, `userActive`, `userCreatedByID`, `userCreatedTD`) VALUES
 (1, 'dejan000', 'sddsa', 'Dejan  Lukic', 0, 'SSuperAdmin', 'dejan@gmailo.clm', 0, '18:38:00', 0, 1, '2022-02-28 17:34:31'),
 (2, 'slaven', 'dasdas', 'Slaven Atlic', 0, 'SSuperAdmin', 'slaven@gmail.com', 2, '18:26:00', 1, 1, '2022-02-28 17:35:47'),
 (3, 'dejan000', 'dadad', 'adada', 0, 'SSuperAdmin', 'saff@fsfs.ccc', 2, '18:39:00', 0, 1, '2022-02-28 17:38:06'),
@@ -68,30 +95,62 @@ INSERT INTO `01users` (`userID`, `userName`, `userPassw`, `userFLname`, `userRan
 -- Table structure for table `03locations`
 --
 
-CREATE TABLE `03locations` (
-  `locID` int(6) NOT NULL,
-  `locType` int(1) NOT NULL,
-  `locNumber` int(6) NOT NULL,
-  `locSname` varchar(50) CHARACTER SET ascii NOT NULL,
-  `locLname` varchar(100) CHARACTER SET ascii NOT NULL,
-  `locDesc` varchar(100) CHARACTER SET ascii NOT NULL,
-  `locLat` decimal(11,7) NOT NULL,
-  `locLong` decimal(11,7) NOT NULL,
-  `locActive` int(1) NOT NULL,
-  `locCreatedByID` int(6) NOT NULL,
+CREATE TABLE `03locations`
+(
+  `locID` int
+(6) NOT NULL,
+  `locType` int
+(1) NOT NULL,
+  `locNumber` int
+(6) NOT NULL,
+  `locSname` varchar
+(50) CHARACTER
+SET ascii
+NOT NULL,
+  `locLname` varchar
+(100) CHARACTER
+SET ascii
+NOT NULL,
+  `locDesc` varchar
+(100) CHARACTER
+SET ascii
+NOT NULL,
+  `locLat` decimal
+(11,7) NOT NULL,
+  `locLong` decimal
+(11,7) NOT NULL,
+  `locActive` int
+(1) NOT NULL,
+  `locCreatedByID` int
+(6) NOT NULL,
   `locCreatedTD` datetime NOT NULL,
-  `locDisable` int(1) NOT NULL,
-  `locDisabledByID` int(6) NOT NULL,
+  `locDisable` int
+(1) NOT NULL,
+  `locDisabledByID` int
+(6) NOT NULL,
   `locDisabledTD` datetime NOT NULL,
-  `locDisableDesc` varchar(100) CHARACTER SET ascii NOT NULL,
-  `locEventMask` int(1) NOT NULL
+  `locDisableDesc` varchar
+(100) CHARACTER
+SET ascii
+NOT NULL,
+  `locEventMask` int
+(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `03locations`
 --
 
-INSERT INTO `03locations` (`locID`, `locType`, `locNumber`, `locSname`, `locLname`, `locDesc`, `locLat`, `locLong`, `locActive`, `locCreatedByID`, `locCreatedTD`, `locDisable`, `locDisabledByID`, `locDisabledTD`, `locDisableDesc`, `locEventMask`) VALUES
+INSERT INTO `03locations` (`
+locID`,
+`locType`,
+`locNumber`,
+`locSname`,
+`locLname`,
+`locDesc`,
+`locLat`,
+`locLong
+`, `locActive`, `locCreatedByID`, `locCreatedTD`, `locDisable`, `locDisabledByID`, `locDisabledTD`, `locDisableDesc`, `locEventMask`) VALUES
 (1, 1, 1, 'Vuk', 'Vukov spomenik', 'nista', '44.8053750', '20.4787222', 1, 1, '2022-02-28 19:08:37', 0, 0, '2022-02-28 19:08:37', 'nista', 0),
 (2, 0, 2, 'SLA1', 'Slavija 1', 'Neki opis, bla bla...', '44.8027777', '20.4670715', 1, 1, '2022-03-02 02:26:24', 0, 0, '2022-03-02 02:26:24', ' ', 0);
 
@@ -101,10 +160,18 @@ INSERT INTO `03locations` (`locID`, `locType`, `locNumber`, `locSname`, `locLnam
 -- Table structure for table `04events`
 --
 
-CREATE TABLE `04events` (
-  `eventID` int(6) NOT NULL,
-  `eventName` varchar(50) CHARACTER SET ascii NOT NULL,
-  `eventDesc` varchar(100) CHARACTER SET ascii NOT NULL
+CREATE TABLE `04events`
+(
+  `eventID` int
+(6) NOT NULL,
+  `eventName` varchar
+(50) CHARACTER
+SET ascii
+NOT NULL,
+  `eventDesc` varchar
+(100) CHARACTER
+SET ascii
+NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -113,10 +180,14 @@ CREATE TABLE `04events` (
 -- Table structure for table `05evhistory`
 --
 
-CREATE TABLE `05evhistory` (
-  `evHistID` int(11) NOT NULL,
-  `evHistEventID` int(6) NOT NULL,
-  `evHistLocID` int(6) NOT NULL,
+CREATE TABLE `05evhistory`
+(
+  `evHistID` int
+(11) NOT NULL,
+  `evHistEventID` int
+(6) NOT NULL,
+  `evHistLocID` int
+(6) NOT NULL,
   `evHistDT` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -126,14 +197,20 @@ CREATE TABLE `05evhistory` (
 -- Table structure for table `fiksnipodaci`
 --
 
-CREATE TABLE `fiksnipodaci` (
-  `lokacija` int(5) UNSIGNED ZEROFILL NOT NULL,
+CREATE TABLE `fiksnipodaci`
+(
+  `lokacija` int
+(5) UNSIGNED ZEROFILL NOT NULL,
   `datum` date NOT NULL,
   `vreme` time NOT NULL,
-  `oznaka` varchar(50) NOT NULL,
-  `kapacitet` int(11) NOT NULL,
-  `slobodna_mesta` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `naziv_lokacije` varchar(100) NOT NULL,
+  `zoneShort` varchar
+(50) NOT NULL,
+  `kapacitet` int
+(11) NOT NULL,
+  `slobodna_mesta` int
+(5) UNSIGNED ZEROFILL NOT NULL,
+  `naziv_lokacije` varchar
+(100) NOT NULL,
   `koordinate` json NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -141,7 +218,10 @@ CREATE TABLE `fiksnipodaci` (
 -- Dumping data for table `fiksnipodaci`
 --
 
-INSERT INTO `fiksnipodaci` (`lokacija`, `datum`, `vreme`, `oznaka`, `kapacitet`, `slobodna_mesta`, `naziv_lokacije`, `koordinate`) VALUES
+INSERT INTO `fiksnipodaci` (`
+lokacija`,
+`datum
+`, `vreme`, `zoneShort`, `kapacitet`, `slobodna_mesta`, `naziv_lokacije`, `koordinate`) VALUES
 (00001, '2022-01-23', '09:29:13', 'Vuk', 119, 00055, 'Vukov spomennik', '[20.4787222, 44.805375]'),
 (00002, '2022-02-16', '23:41:42', 'Sla', 110, 00055, 'Slaviija 1', '[20.4670715, 44.8027777]'),
 (00003, '2022-01-26', '19:41:13', 'MGM', 310, 00025, 'MGM', '[20.4543147, 44.8294684]'),
@@ -162,19 +242,26 @@ INSERT INTO `fiksnipodaci` (`lokacija`, `datum`, `vreme`, `oznaka`, `kapacitet`,
 -- Table structure for table `podaci`
 --
 
-CREATE TABLE `podaci` (
+CREATE TABLE `podaci`
+(
   `datum` date NOT NULL,
   `vreme` time NOT NULL,
-  `lokacija` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `slobodna_mesta` int(5) UNSIGNED ZEROFILL NOT NULL,
-  `naziv_lokacije` varchar(100) NOT NULL
+  `lokacija` int
+(5) UNSIGNED ZEROFILL NOT NULL,
+  `slobodna_mesta` int
+(5) UNSIGNED ZEROFILL NOT NULL,
+  `naziv_lokacije` varchar
+(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `podaci`
 --
 
-INSERT INTO `podaci` (`datum`, `vreme`, `lokacija`, `slobodna_mesta`, `naziv_lokacije`) VALUES
+INSERT INTO `podaci` (`
+datum`,
+`vreme
+`, `lokacija`, `slobodna_mesta`, `naziv_lokacije`) VALUES
 ('2022-01-21', '19:26:45', 00001, 00100, 'VMA'),
 ('2022-01-27', '23:28:13', 00003, 00222, 'Vracar'),
 ('2022-01-27', '23:28:13', 00004, 00444, 'Banjica'),
@@ -199,16 +286,22 @@ INSERT INTO `podaci` (`datum`, `vreme`, `lokacija`, `slobodna_mesta`, `naziv_lok
 -- Table structure for table `test`
 --
 
-CREATE TABLE `test` (
-  `test1` int(1) NOT NULL,
-  `test2` varchar(30) NOT NULL
+CREATE TABLE `test`
+(
+  `test1` int
+(1) NOT NULL,
+  `test2` varchar
+(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `test`
 --
 
-INSERT INTO `test` (`test1`, `test2`) VALUES
+INSERT INTO `test` (`
+test1`,
+`test2
+`) VALUES
 (1, 'testiramo'),
 (1, 'noviTest');
 
@@ -220,25 +313,29 @@ INSERT INTO `test` (`test1`, `test2`) VALUES
 -- Indexes for table `01users`
 --
 ALTER TABLE `01users`
-  ADD PRIMARY KEY (`userID`);
+ADD PRIMARY KEY
+(`userID`);
 
 --
 -- Indexes for table `03locations`
 --
 ALTER TABLE `03locations`
-  ADD PRIMARY KEY (`locID`);
+ADD PRIMARY KEY
+(`locID`);
 
 --
 -- Indexes for table `04events`
 --
 ALTER TABLE `04events`
-  ADD PRIMARY KEY (`eventID`);
+ADD PRIMARY KEY
+(`eventID`);
 
 --
 -- Indexes for table `05evhistory`
 --
 ALTER TABLE `05evhistory`
-  ADD PRIMARY KEY (`evHistID`);
+ADD PRIMARY KEY
+(`evHistID`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -248,25 +345,29 @@ ALTER TABLE `05evhistory`
 -- AUTO_INCREMENT for table `01users`
 --
 ALTER TABLE `01users`
-  MODIFY `userID` int(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `userID` int
+(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `03locations`
 --
 ALTER TABLE `03locations`
-  MODIFY `locID` int(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `locID` int
+(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `04events`
 --
 ALTER TABLE `04events`
-  MODIFY `eventID` int(6) NOT NULL AUTO_INCREMENT;
+  MODIFY `eventID` int
+(6) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `05evhistory`
 --
 ALTER TABLE `05evhistory`
-  MODIFY `evHistID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `evHistID` int
+(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

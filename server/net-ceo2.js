@@ -3,6 +3,7 @@ const port = 2022;
 let podaciSaTable = '';
 const fileService = require('./fileService');
 const dbService = require('./dbService');
+// const { stringify } = require('querystring');
 // let sendEmail = require('./email');
 
 const server = net.createServer((socket) => {
@@ -15,11 +16,11 @@ const server = net.createServer((socket) => {
         const datum = new Date().toLocaleString('sr');
         const IP = socket.remoteAddress.replace('::ffff:', '');
         const lastPacketFile = `Date: ${datum} IP: ${IP} \n ${lastPacket} \n`
-        const file = fileService.getFileServiceInstance();
-        const result = file.logFileSensit(lastPacketFile);
-        result
-            .then(data => console.log(`File: ${data}`))
-            .catch(err => console.log(err));
+        // const file = fileService.getFileServiceInstance();
+        // const result = file.logFileSensit(lastPacketFile);
+        // result
+        //     .then(data => console.log(`File: ${data}`))
+        //     .catch(err => console.log(err));
 
         let tabla = podaciSaTable[0].split(','); //radi na serveru, sada i kod mene
         // let tabla = JSON.parse(podaciSaTable).split(','); //radi kod mene
@@ -63,7 +64,6 @@ const server = net.createServer((socket) => {
             Sgn: tabla[36],
             checksum: tabla[37],
         }
-        // console.log('Test: ' + objTabla);
 
         const db = dbService.getDbServiceInstance();
         const result1 = db.updateSensitOnLastPacket(lastPacket, `${objTabla.displej1}/${objTabla.displej2}`, `${objTabla.displej3}/${objTabla.displej4}`, `${objTabla.displej5}/${objTabla.displej6}`, `${objTabla.displej7}/${objTabla.displej8}`, objTabla.adresa);
@@ -74,7 +74,7 @@ const server = net.createServer((socket) => {
         const crcData = CRC.ToCRC16(`${objTabla.vrstaPaketa},${objTabla.adresa},${objTabla.displej1},${objTabla.displej2},${objTabla.displej3},${objTabla.displej4},${objTabla.displej5},${objTabla.displej6},${objTabla.displej7},${objTabla.displej8},${objTabla.osvetljenje},${objTabla.accuNapon},${objTabla.accuTemp},${objTabla.in220},${objTabla.inBack1},${objTabla.inBack2},${objTabla.inBack3},${objTabla.inBack4},${objTabla.osvetljenjeHi},${objTabla.osvetljenjeLo},${objTabla.accuCutOff},${objTabla.offTimeSec},${objTabla.rele220v},${objTabla.releAccu},${objTabla.releOff},${objTabla.testTimerSec},${objTabla.test},${objTabla.Pow},${objTabla.RstS},${objTabla.RstH},${objTabla.Pck},${objTabla.Ses},${objTabla.Cid},${objTabla.IPa},${objTabla.Rev},${objTabla.Ver},${objTabla.Sgn},`);
         console.log('CRC = ' + crcData);
         // pocetak novog dela
-        if (objTabla.checksum === crcData) {
+        if (objTabla.checksum === crcData && (objTabla.Pow <= 999 && objTabla.RstS <= 999 && objTabla.RstH <= 999 && objTabla.Pck <= 999)) {
             //Test!!
             if (objTabla.adresa === '255') {
                 const db = dbService.getDbServiceInstance();
@@ -190,7 +190,7 @@ const server = net.createServer((socket) => {
                                     displej3a: displej3a(),
                                     displej4: displej4(),
                                     displej4a: displej4a(),
-                                    osvetljenjeHi: '0700',
+                                    osvetljenjeHi: '0077',
                                     osvetljenjeLo: '0600',
                                     accuCutOff: '0500',
                                     testTimerSec: '0000',
@@ -200,6 +200,11 @@ const server = net.createServer((socket) => {
                                 const objSlanjeCheck = Object.assign(objSlanje, {
                                     checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej1a},${objSlanje.displej2},${objSlanje.displej2a},${objSlanje.displej3},${objSlanje.displej3a},${objSlanje.displej4},${objSlanje.displej4a},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
                                 });
+                                const file = fileService.getFileServiceInstance();
+                                const result = file.logFileSensit(`${lastPacketFile} ${Object.values(objSlanjeCheck).toString()} \n`);
+                                result
+                                    .then(data => console.log(`File: ${data}`))
+                                    .catch(err => console.log(err));
                                 socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
                             })
                     })
@@ -207,6 +212,105 @@ const server = net.createServer((socket) => {
             }
         } else {
             console.log('Data missing!!!');
+            const db = dbService.getDbServiceInstance();
+            const dbResult = db.getSensitDataByLocNumber(objTabla.adresa);
+            dbResult
+                .then(data => {
+                    const displayData = {};
+                    displayData.locDisp1zoneID = data[0].locDisp1zoneID;
+                    displayData.locDisp2zoneID = data[0].locDisp2zoneID;
+                    displayData.locDisp3zoneID = data[0].locDisp3zoneID;
+                    displayData.locDisp4zoneID = data[0].locDisp4zoneID;
+                    const db = dbService.getDbServiceInstance();
+                    const dbResult = db.getSensitDataByDisplayID(displayData.locDisp1zoneID, displayData.locDisp2zoneID, displayData.locDisp3zoneID, displayData.locDisp4zoneID);
+                    dbResult
+                        .then(data => {
+                            const displej1 = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp1zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp1zoneID).ZaDisplej1;
+                                }
+                            }
+                            const displej1a = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp1zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp1zoneID).ZaDisplej2;
+                                }
+                            }
+                            const displej2 = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp2zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp2zoneID).ZaDisplej1;
+                                }
+                            }
+                            const displej2a = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp2zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp2zoneID).ZaDisplej2;
+                                }
+                            }
+                            const displej3 = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp3zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp3zoneID).ZaDisplej1;
+                                }
+                            }
+                            const displej3a = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp3zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp3zoneID).ZaDisplej2;
+                                }
+                            }
+                            const displej4 = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp4zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp4zoneID).ZaDisplej1;
+                                }
+                            }
+                            const displej4a = () => {
+                                if (data.find(dat => dat.zoneShort === displayData.locDisp4zoneID) === undefined) {
+                                    return '00';
+                                } else {
+                                    return data.find(dat => dat.zoneShort === displayData.locDisp4zoneID).ZaDisplej2;
+                                }
+                            }
+
+                            let objSlanje = {
+                                adresa: objTabla.adresa,
+                                displej1: displej1(),
+                                displej1a: displej1a(),
+                                displej2: displej2(),
+                                displej2a: displej2a(),
+                                displej3: displej3(),
+                                displej3a: displej3a(),
+                                displej4: displej4(),
+                                displej4a: displej4a(),
+                                osvetljenjeHi: '0077',
+                                osvetljenjeLo: '0600',
+                                accuCutOff: '0500',
+                                testTimerSec: '0000',
+                                test: '0',
+                            }
+                            console.log(objSlanje);
+                            const objSlanjeCheck = Object.assign(objSlanje, {
+                                checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej1a},${objSlanje.displej2},${objSlanje.displej2a},${objSlanje.displej3},${objSlanje.displej3a},${objSlanje.displej4},${objSlanje.displej4a},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
+                            });
+                            const file = fileService.getFileServiceInstance();
+                            const result = file.logFileSensit(`${lastPacketFile} Brojac veci od 999!! \n ${Object.values(objSlanjeCheck).toString()} \n`);
+                            result
+                                .then(data => console.log(`File: ${data}`))
+                                .catch(err => console.log(err));
+                            socket.write(`{${Object.values(objSlanjeCheck).toString()}}`);
+                        })
+                })
+                .catch(err => console.log(err));
         }
     });
     socket.on('end', () => {
