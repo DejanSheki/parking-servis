@@ -1,105 +1,7 @@
 const dbService = require('./dbService');
-let sendEmail = require('./email');
-
-let counter = 0;
-
-function lastComm() {
-    const db = dbService.getDbServiceInstance();
-    const result = db.lastCommunication();
-    result
-        .then(data => {
-            const fiveMinuteAgo = new Date(Date.now() - 1000 * (60 * 5));
-            const tenMinuteAgo = new Date(Date.now() - 1000 * (60 * 10));
-            console.log(fiveMinuteAgo);
-            // console.log(tenMinuteAgo);
-            const notNull = data.filter(d => d.locLastCommTD !== null);
-            // console.log(notNull);
-            const notCommunicate = notNull.filter(d => new Date(d.locLastCommTD) <= fiveMinuteAgo);
-            notCommunicate.forEach(dat => {
-                console.log(dat.locLname);
-                const db = dbService.getDbServiceInstance();
-                const result = db.updateLastCommunication('#b4b4b4', dat.locID);
-
-                const eventName = `Zadnje javljanje.`;
-                const eventDesc = `Lokacija: ${dat.locID}, ${dat.locLname} se zadnji put javila u ${dat.locLastCommTD}.`
-                const dbEvents = dbService.getDbServiceInstance();
-                const resultEvents = dbEvents.insertEvents(eventName, eventDesc);
-            })
-            const communicate = data.filter(d => new Date(d.locLastCommTD) >= fiveMinuteAgo);
-            // console.log(communicate);
-            communicate.forEach(dat => {
-                // console.log(dat.locID);
-                const db = dbService.getDbServiceInstance();
-                const result = db.updateLastCommunication('#ffffff', dat.locID);
-            })
-            const isNull = data.filter(d => d.locLastCommTD === null);
-            // console.log(isNull);
-            isNull.forEach(dat => {
-                // console.log(dat.locID);
-                const db = dbService.getDbServiceInstance();
-                const result = db.updateLastCommunication('#ffffff', dat.locID);
-            })
-        })
-        .catch(err => console.log(err));
-}
-
-lastComm();
-
-// const interval = setInterval(() => {
-//     lastComm();
-//     console.log(counter);
-// }, 30000);
-
-function sendMail() {
-    const db = dbService.getDbServiceInstance();
-    const result = db.selectEvents();
-    result
-        .then(data => {
-            console.log(data);
-            data.forEach(d => {
-                if (d.eventID > counter) {
-                    let message = `Event : ${d.eventID} \n ${d.eventName} \n ${d.eventDesc}`;
-                    const email = sendEmail.getEmailInstance();
-                    const sent = email.promeneNaTabli(message);
-                    counter++;
-                    console.log(counter);
-                }
-            })
-        })
-        .catch(err => console.log(err));
-}
-console.log(counter);
-sendMail();
-
-// const db = dbService.getDbServiceInstance();
-// const result = db.lastCommunicationMail();
-// result
-//     .then(data => {
-//         // console.log(data);
-//         // const zadnji = new Date(Math.max(...data.map(e => new Date(e.locLastCommTD)))).toLocaleString('sr');
-//         // const notNull = data.filter(e => e.locLastPacket !== null);
-
-//         const packet = packets(data);
-//         const packet98 = packet.filter(dat => dat.vrstaPaketa === '99');
-//         packet98.forEach(pack => {
-//             let message = `Uredjaj ${pack.adresa}: \nNaziv: ${pack.locSname} \n Vrsta paketa: ${pack.vrstaPaketa} Uredjaj se upalio.`
-//             // const email = sendEmail.getEmailInstance();
-//             // const sent = email.promeneNaTabli(message);
-//         })
-//         // console.log(packet98);
-//         const packetIN220 = packet.filter(dat => dat.in220 === '0');
-//         packetIN220.forEach(pack => {
-//             console.log(pack);
-//             // const eventName = `Zadnje javljanje.`;
-//             // const eventDesc = `Lokacija: ${dat.locID}, ${dat.locLname} se zadnji put javila u ${dat.locLastCommTD}.`
-//             // const dbEvents = dbService.getDbServiceInstance();
-//             // const resultEvents = dbEvents.insertEvents(eventName, eventDesc);
-//             // let message = `Uredjaj ${pack.adresa}: \nNaziv: ${pack.locSname} \n Uredjaj je ostao bez napona.`
-//             // const email = sendEmail.getEmailInstance();
-//             // const sent = email.promeneNaTabli(message);
-//         })
-//         // console.log(packetIN220);
-//     })
+const db = dbService.getDbServiceInstance();
+const sendEmail = require('./email');
+const email = sendEmail.getEmailInstance();
 
 function packets(data) {
     const packet = [];
@@ -199,38 +101,62 @@ function packets(data) {
 
 // original
 
-// function lastComm() {
-//     const db = dbService.getDbServiceInstance();
-//     const result = db.lastCommunication();
-//     result
-//         .then(data => {
-//             const fiveMinuteAgo = new Date(Date.now() - 1000 * (60 * 5));
-//             //console.log(fiveMinuteAgo);
-//             const notNull = data.filter(d => d.locLastCommTD !== null);
-//             // console.log(notNull);
-//             const notCommunicate = notNull.filter(d => new Date(d.locLastCommTD) <= fiveMinuteAgo)
-//             // console.log(notCommunicate);
-//             notCommunicate.forEach(dat => {
-//                 console.log(dat.locID);
-//                 const db = dbService.getDbServiceInstance();
-//                 const result = db.updateLastCommunication('#b4b4b4', dat.locID);
-//             })
-//             const communicate = data.filter(d => new Date(d.locLastCommTD) > fiveMinuteAgo);
-//             // console.log(communicate);
-//             communicate.forEach(dat => {
-//                 // console.log(dat.locID);
-//                 const db = dbService.getDbServiceInstance();
-//                 const result = db.updateLastCommunication('#ffffff', dat.locID);
-//             })
-//             const isNull = data.filter(d => d.locLastCommTD === null);
-//             // console.log(isNull);
-//             isNull.forEach(dat => {
-//                 // console.log(dat.locID);
-//                 const db = dbService.getDbServiceInstance();
-//                 const result = db.updateLastCommunication('#ffffff', dat.locID);
-//             })
-//         })
-//         .catch(err => console.log(err));
-// }
+function lastComm() {
+    const result = db.lastCommunication();
+    result
+        .then(data => {
+            const fiveMinuteAgo = new Date(Date.now() - 1000 * (60 * 5));
+            //console.log(fiveMinuteAgo);
+            const notNull = data.filter(d => d.locLastCommTD !== null);
+            // console.log(notNull);
+            const notCommunicate = notNull.filter(d => new Date(d.locLastCommTD) <= fiveMinuteAgo)
+            // console.log(notCommunicate);
+            notCommunicate.forEach(dat => {
+                console.log(dat.locID);
+                const result = db.updateLastCommunication('#b4b4b4', dat.locID);
+            })
+            const communicate = data.filter(d => new Date(d.locLastCommTD) > fiveMinuteAgo);
+            // console.log(communicate);
+            communicate.forEach(dat => {
+                // console.log(dat.locID);
+                const result = db.updateLastCommunication('#ffffff', dat.locID);
+            })
+            const isNull = data.filter(d => d.locLastCommTD === null);
+            // console.log(isNull);
+            isNull.forEach(dat => {
+                // console.log(dat.locID);
+                const result = db.updateLastCommunication('#ffffff', dat.locID);
+            })
+        })
+        .catch(err => console.log(err));
+}
 
-// lastComm();
+lastComm();
+// Last comm
+function lastCommunication() {
+    const fiveMinuteAgo = new Date(Date.now() - 1000 * (60 * 5));
+    const result = db.lastCommunication();
+    result
+        .then(data => {
+            let message;
+            const notNull = data.filter(d => d.locLastCommTD !== null);
+            notNull.forEach(notC => {
+                if (new Date(notC.locLastCommTD) <= fiveMinuteAgo && notC.emailSent === 0) {
+                    db.updateLastCommunicationOnEmailSent(1, notC.locID);
+                    message = `Uredjaj br. S${notC.locNumber}, ${notC.locLname} se zadnji put javio u ${notC.locLastCommTD}!`;
+                    email.promeneNaTabli(message);
+                    console.log('Uredjaj ne komunicira vise od 5 min!!!');
+                }
+                if (new Date(notC.locLastCommTD) >= fiveMinuteAgo && notC.emailSent === 1) {
+                    db.updateLastCommunicationOnEmailSent(0, notC.locID);
+                    message = `Uredjaj br. S${notC.locNumber}, ${notC.locLname} se ponovo javio u ${notC.locLastCommTD}!`;
+                    email.promeneNaTabli(message);
+                    console.log('Uredjaj se ponovo javio!!!');
+                }
+            });
+        })
+}
+lastCommunication();
+
+setInterval(lastCommunication, 30000);
+setInterval(lastComm, 30000);

@@ -2,9 +2,13 @@ const net = require('net');
 const port = 2022;
 let podaciSaTable = '';
 const fileService = require('./fileService');
+const file = fileService.getFileServiceInstance();
 const dbService = require('./dbService');
+const db = dbService.getDbServiceInstance();
+const sendEmail = require('./email');
+const email = sendEmail.getEmailInstance();
 // const { stringify } = require('querystring');
-// let sendEmail = require('./email');
+
 
 const server = net.createServer((socket) => {
     console.log(`${Date()} Client connected.. ${socket.remoteAddress} : ${socket.remotePort}`);
@@ -59,20 +63,21 @@ const server = net.createServer((socket) => {
             Sgn: tabla[36],
             checksum: tabla[37],
         }
+        // Provera i slanje mail-a
+        checkDataForMail(objTabla.adresa, objTabla);
 
-        const db = dbService.getDbServiceInstance();
-        const result1 = db.updateSensitOnLastPacket(lastPacket, `${objTabla.displej1}/${objTabla.displej2}`, `${objTabla.displej3}/${objTabla.displej4}`, `${objTabla.displej5}/${objTabla.displej6}`, `${objTabla.displej7}/${objTabla.displej8}`, objTabla.adresa);
-        result1
+        // Last packet update
+        const result = db.updateSensitOnLastPacket(lastPacket, `${objTabla.displej1}/${objTabla.displej2}`, `${objTabla.displej3}/${objTabla.displej4}`, `${objTabla.displej5}/${objTabla.displej6}`, `${objTabla.displej7}/${objTabla.displej8}`, objTabla.adresa);
+        result
             .then(data => console.log('Last packet update: ' + data.message))
             .catch(err => console.log(err));
 
         const crcData = CRC.ToCRC16(`${objTabla.vrstaPaketa},${objTabla.adresa},${objTabla.displej1},${objTabla.displej2},${objTabla.displej3},${objTabla.displej4},${objTabla.displej5},${objTabla.displej6},${objTabla.displej7},${objTabla.displej8},${objTabla.osvetljenje},${objTabla.accuNapon},${objTabla.accuTemp},${objTabla.in220},${objTabla.inBack1},${objTabla.inBack2},${objTabla.inBack3},${objTabla.inBack4},${objTabla.osvetljenjeHi},${objTabla.osvetljenjeLo},${objTabla.accuCutOff},${objTabla.offTimeSec},${objTabla.rele220v},${objTabla.releAccu},${objTabla.releOff},${objTabla.testTimerSec},${objTabla.test},${objTabla.Pow},${objTabla.RstS},${objTabla.RstH},${objTabla.Pck},${objTabla.Ses},${objTabla.Cid},${objTabla.IPa},${objTabla.Rev},${objTabla.Ver},${objTabla.Sgn},`);
         console.log('CRC = ' + crcData);
-        // pocetak novog dela
+
         if (objTabla.checksum === crcData && (objTabla.Pow <= 999 && objTabla.RstS <= 999 && objTabla.RstH <= 999 && objTabla.Pck <= 999)) {
             //Test!!
             if (objTabla.adresa === '255') {
-                const db = dbService.getDbServiceInstance();
                 const result = db.getTest2();
                 result
                     .then(data => {
@@ -105,7 +110,6 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else {
-                const db = dbService.getDbServiceInstance();
                 const dbResult = db.getSensitDataByLocNumber(objTabla.adresa);
                 dbResult
                     .then(data => {
@@ -114,7 +118,6 @@ const server = net.createServer((socket) => {
                         displayData.locDisp2zoneID = data[0].locDisp2zoneID;
                         displayData.locDisp3zoneID = data[0].locDisp3zoneID;
                         displayData.locDisp4zoneID = data[0].locDisp4zoneID;
-                        const db = dbService.getDbServiceInstance();
                         const dbResult = db.getSensitDataByDisplayID(displayData.locDisp1zoneID, displayData.locDisp2zoneID, displayData.locDisp3zoneID, displayData.locDisp4zoneID);
                         dbResult
                             .then(data => {
@@ -191,11 +194,10 @@ const server = net.createServer((socket) => {
                                     testTimerSec: '0000',
                                     test: '0',
                                 }
-                                console.log(objSlanje);
+                                // console.log(objSlanje);
                                 const objSlanjeCheck = Object.assign(objSlanje, {
                                     checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej1a},${objSlanje.displej2},${objSlanje.displej2a},${objSlanje.displej3},${objSlanje.displej3a},${objSlanje.displej4},${objSlanje.displej4a},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
                                 });
-                                const file = fileService.getFileServiceInstance();
                                 const result = file.logFileSensit(`${lastPacketFile} ${Object.values(objSlanjeCheck).toString()} \n`);
                                 result
                                     .then(data => console.log(`File: ${data}`))
@@ -207,7 +209,6 @@ const server = net.createServer((socket) => {
             }
         } else {
             console.log('Data missing!!!');
-            const db = dbService.getDbServiceInstance();
             const dbResult = db.getSensitDataByLocNumber(objTabla.adresa);
             dbResult
                 .then(data => {
@@ -216,7 +217,6 @@ const server = net.createServer((socket) => {
                     displayData.locDisp2zoneID = data[0].locDisp2zoneID;
                     displayData.locDisp3zoneID = data[0].locDisp3zoneID;
                     displayData.locDisp4zoneID = data[0].locDisp4zoneID;
-                    const db = dbService.getDbServiceInstance();
                     const dbResult = db.getSensitDataByDisplayID(displayData.locDisp1zoneID, displayData.locDisp2zoneID, displayData.locDisp3zoneID, displayData.locDisp4zoneID);
                     dbResult
                         .then(data => {
@@ -297,7 +297,6 @@ const server = net.createServer((socket) => {
                             const objSlanjeCheck = Object.assign(objSlanje, {
                                 checksum: CRC.ToCRC16(`${objSlanje.adresa},${objSlanje.displej1},${objSlanje.displej1a},${objSlanje.displej2},${objSlanje.displej2a},${objSlanje.displej3},${objSlanje.displej3a},${objSlanje.displej4},${objSlanje.displej4a},${objSlanje.osvetljenjeHi},${objSlanje.osvetljenjeLo},${objSlanje.accuCutOff},${objSlanje.testTimerSec},${objSlanje.test},`)
                             });
-                            const file = fileService.getFileServiceInstance();
                             const result = file.logFileSensit(`${lastPacketFile} Brojac veci od 999!! \n ${Object.values(objSlanjeCheck).toString()} \n`);
                             result
                                 .then(data => console.log(`File: ${data}`))
@@ -428,3 +427,63 @@ CRC.padLeft = function (s, w, pc) {
 // ])
 
 // console.log(crcData);
+
+// provera i slanje mail-a
+function checkDataForMail(locNumber, objTabla) {
+    const result = db.getSensitDataByLocNumber(locNumber);
+    result
+        .then(data => {
+            // Napon
+            const dataSplit = data[0].locLastPacket.split(',');
+            const in220Last = Number(dataSplit[13]);
+            const in220New = Number(objTabla.in220);
+            const emailSent = data[0].emailSent;
+            console.log(`Last : ${in220Last}, New : ${in220New}, MailSent : ${emailSent}`);
+            if (in220New === 0 && in220Last === 1 && emailSent === 0) {
+                db.updateLastCommunicationOnEmailSent(1, data[0].locID);
+                let message = `Uredjaj br. S${data[0].locNumber}, ${data[0].locSname} je ostao bez napona!`;
+                email.promeneNaTabli(message);
+                console.log('Nestalo struje!!!');
+            }
+            if (in220New === 1 && in220Last === 0 && emailSent === 1) {
+                db.updateLastCommunicationOnEmailSent(2, data[0].locID);
+                let message = `Uredjaj br. S${data[0].locNumber}, ${data[0].locSname} je dobio napon!`;
+                email.promeneNaTabli(message);
+                console.log('Dosla struja!!!');
+            }
+            if (in220New === 1 && in220Last === 1 && emailSent === 2) {
+                db.updateLastCommunicationOnEmailSent(0, data[0].locID);
+                console.log('Sve vraceno na pocetak!!!');
+            }
+        });
+}
+
+// // Last comm
+// function lastCommunication() {
+//     const fiveMinuteAgo = new Date(Date.now() - 1000 * (60 * 5));
+//     const result = db.lastCommunication();
+//     result
+//         .then(data => {
+//             let message;
+//             const notNull = data.filter(d => d.locLastCommTD !== null);
+//             // const notCommunicate = notNull.filter(d => new Date(d.locLastCommTD) <= fiveMinuteAgo);
+//             // const communicate = notNull.filter(d => new Date(d.locLastCommTD) >= fiveMinuteAgo);
+//             // const communicateData = [...notCommunicate, ...communicate];
+//             // console.log(notNull);
+//             notNull.forEach(notC => {
+//                 if (new Date(notC.locLastCommTD) <= fiveMinuteAgo && notC.emailSent === 0) {
+//                     db.updateLastCommunicationOnEmailSent(1, notC.locID);
+//                     message = `Uredjaj br. S${notC.locNumber}, ${notC.locLname} se zadnji put javio u ${notC.locLastCommTD}!`;
+//                     email.promeneNaTabli(message);
+//                     console.log('Uredjaj ne komunicira vise od 5 min!!!');
+//                 }
+//                 if (new Date(notC.locLastCommTD) >= fiveMinuteAgo && notC.emailSent === 1) {
+//                     db.updateLastCommunicationOnEmailSent(0, notC.locID);
+//                     message = `Uredjaj br. S${notC.locNumber}, ${notC.locLname} se ponovo javio u ${notC.locLastCommTD}!`;
+//                     email.promeneNaTabli(message);
+//                     console.log('Uredjaj se ponovo javio!!!');
+//                 }
+//             });
+//         })
+// }
+// lastCommunication()

@@ -651,7 +651,7 @@ class DbService {
     async lastCommunication() {
         try {
             const response = await new Promise((resolve, reject) => {
-                const query = "SELECT locID, locLname, locLastCommTD FROM 03locations;"
+                const query = "SELECT locID, locLname, locLastCommTD, emailSent, locNumber FROM 03locations;"
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -674,6 +674,21 @@ class DbService {
             });
             // console.log(insertZone);
             return insertZone;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async updateLastCommunicationOnEmailSent(emailSent, locID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE 03locations SET emailSent = ? WHERE locID = ?";
+                connection.query(query, [emailSent, locID], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            // console.log(insertZone);
+            return response;
         } catch (error) {
             console.log(error);
         }
