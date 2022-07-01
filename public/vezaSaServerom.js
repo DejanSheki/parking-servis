@@ -190,7 +190,7 @@ function display(dbData, dat) {
     zones.forEach(d => {
         if (d.zoneShort === dat.locDisp1zoneID) {
             displayData.d1 = d.zoneShort;
-            console.log(d.zoneShort);
+            // console.log(d.zoneShort);
         } else if (displayData.d1 === undefined) {
             displayData.d1 = '---';
         }
@@ -265,33 +265,32 @@ function displayBg(dbData, dat) {
     })
     return displayBg;
 }
+function model(dat) {
+    if (dat.locType === 1) {
+        return {
+            locModel: `P${dat.locNumber}`,
+            idBackground: 'rgb(96, 143, 255)'
+        }
+    } else if (dat.locType === 2) {
+        return {
+            locModel: `S${dat.locNumber}`,
+            idBackground: 'rgb(166, 126, 78)'
+        }
+    } else {
+        return {
+            locModel: `Nije izabran!`,
+            idBackground: 'rgb(255, 64, 64)'
+        }
+    }
+}
 
 function createTable(dbData) {
     dbData[0].forEach(dat => {
-        let model = () => {
-            if (dat.locType === 1) {
-                return {
-                    locModel: `P${dat.locNumber}`,
-                    idBackground: 'rgb(96, 143, 255)'
-                }
-            } else if (dat.locType === 2) {
-                return {
-                    locModel: `S${dat.locNumber}`,
-                    idBackground: 'rgb(166, 126, 78)'
-                }
-            } else {
-                return {
-                    locModel: `Nije izabran!`,
-                    idBackground: 'rgb(255, 64, 64)'
-                }
-            }
-        }
-        const { locModel, idBackground } = model();
         const tr = document.createElement('tr');
-        tr.classList.add(`${dat.locID}`);
+        tr.classList.add(`${model(dat).locModel}`);
         tr.style.backgroundColor = dat.locColor;
         tr.innerHTML = `
-            <th style="background-color: ${idBackground};">${locModel}</th>
+            <th style="background-color: ${model(dat).idBackground};">${model(dat).locModel}</th>
         	<td>${dat.locSname}</td>
         	<td style="background-color: ${displayBg(dbData, dat).bg1};">${display(dbData, dat).d1}  ${displayValue(dbData, dat).d1}</td>
         	<td style="background-color: ${displayBg(dbData, dat).bg2};">${display(dbData, dat).d2}  ${displayValue(dbData, dat).d2}</td>
@@ -304,13 +303,6 @@ function createTable(dbData) {
     });
 }
 fetchData();
-
-// const intervalLocations = setInterval(() => {
-//     tabela1.innerHTML = '';
-//     sensitTable.innerHTML = '';
-//     fetchData();
-//     fetchSensitData();
-// }, 30000);
 
 //druga tabela menjamo samo polja u tabeli
 const lok01 = document.querySelector('#lok_01');
@@ -689,6 +681,7 @@ fetchSensitData();
 function createSensitTable(data) {
     data.forEach(d => {
         const tr = document.createElement('tr');
+        tr.classList.add(`${d.zoneShort}`);
         tr.innerHTML = `
         <th>${d.zoneShort}</th>
         <td>${d.zoneName}</td>
@@ -701,3 +694,38 @@ function createSensitTable(data) {
         sensitTable.appendChild(tr);
     })
 }
+
+async function updateTable() {
+    // Sensit
+    const fetchLink = "http://192.168.0.10:2021/get46finalSensit";
+    const data = await fetchApi(fetchLink);
+    data.forEach(dat => {
+        const sensitDisplays = document.querySelectorAll(`.${dat.zoneShort}`);
+        sensitDisplays[0].cells[3].innerHTML = dat.ZaDisplej1;
+        sensitDisplays[0].cells[4].innerHTML = dat.ZaDisplej2;
+    });
+
+    Promise.all([
+        fetch('http://192.168.0.10:2021/getAllActiveLocations')
+            .then(data => data.json()),
+        fetch('http://192.168.0.10:2021/getAllActiveZonesData')
+            .then(data => data.json()),
+        fetch('http://192.168.0.10:2021/get46finalSensit')
+            .then(data => data.json())
+    ]).then((dbData) => {
+        dbData[0].forEach(dat => {
+            const displayCells = document.querySelector(`.${model(dat).locModel}`);
+            displayCells.cells[2].innerHTML = `${display(dbData, dat).d1}  ${displayValue(dbData, dat).d1}`;
+            displayCells.cells[2].style.backgroundColor = `${displayBg(dbData, dat).bg1}`;
+            displayCells.cells[3].innerHTML = `${display(dbData, dat).d2}  ${displayValue(dbData, dat).d2}`;
+            displayCells.cells[3].style.backgroundColor = `${displayBg(dbData, dat).bg2}`;
+            displayCells.cells[4].innerHTML = `${display(dbData, dat).d3}  ${displayValue(dbData, dat).d3}`;
+            displayCells.cells[4].style.backgroundColor = `${displayBg(dbData, dat).bg3}`;
+            displayCells.cells[5].innerHTML = `${display(dbData, dat).d4}  ${displayValue(dbData, dat).d4}`;
+            displayCells.cells[5].style.backgroundColor = `${displayBg(dbData, dat).bg4}`;
+        });
+    })
+}
+setInterval(updateTable, 3000);
+
+
