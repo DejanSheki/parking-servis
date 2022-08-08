@@ -1,4 +1,4 @@
 # Parking servis
 
-[x] CentOS7
-[x] NodeJS
+- [x] CentOS7
+- [x] NodeJS
