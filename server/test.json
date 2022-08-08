@@ -1,0 +1,231 @@
+[
+    {
+        "time": {
+            "vreme": "00:00-07:00",
+            "zone": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "lot": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "vreme": "07:01-16:59",
+        "zone": [
+            1,
+            3,
+            4
+        ],
+        "lot": [
+            1,
+            2,
+            3
+        ]
+    },
+    {
+        "time": {
+            "vreme": "17:00-23:59",
+            "zone": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "lot": [
+                1,
+                2,
+                3
+            ]
+        }
+    }
+]
+
+
+UPDATE `test` SET `jsonTest`='[
+    {
+        "vremeOd": "00:00:00",
+        "vremeDo": "07:00:00",
+        "zone": [
+            {
+                "lotNo": 1,
+                "zoneNo": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            {
+                "lotNo": 2,
+                "zoneNo": [
+                    3,
+                    4,
+                    6,
+                    47,
+                    5
+                ]
+            }
+        ]
+    },
+    {
+        "vremeOd": "07:01:00",
+        "vremeDo": "16:59:00",
+        "zone": [
+            {
+                "lotNo": 1,
+                "zoneNo": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
+            },
+            {
+                "lotNo": 2,
+                "zoneNo": [
+                    3,
+                    4,
+                    6,
+                    47,
+                    5
+                ]
+            }
+        ]
+    },
+    {
+        "vremeOd": "17:00:00",
+        "vremeDo": "23:59:00",
+        "zone": [
+            {
+                "lotNo": 1,
+                "zoneNo": [
+                    5,
+                    11,
+                    6
+                ]
+            },
+            {
+                "lotNo": 2,
+                "zoneNo": [
+                    4
+                ]
+            },
+            {
+                "lotNo": 3,
+                "zoneNo": [
+                    1,
+                    2,
+                    3,
+                    9
+                ]
+            },
+            {
+                "lotNo": 4,
+                "zoneNo": [
+                    1,
+                    2
+                ]
+            },
+            {
+                "lotNo": 5,
+                "zoneNo": [
+                    1,
+                    2
+                ]
+            }
+        ]
+    }
+]' WHERE `naziv`= 'vuk'
+
+
+
+UPDATE `test` SET `jsonTest`='[
+    {
+        "vremeOd": "00:00:00",
+        "vremeDo": "23:59:00",
+        "zone": [
+            {
+                "lotNo": 30,
+                "zoneNo": [
+                    11,
+                    1,
+                    2
+                ]
+            },
+            {
+                "lotNo": 31,
+                "zoneNo": [
+                    3,
+                    4
+                ]
+            },
+            {
+                "lotNo": 32,
+                "zoneNo": [
+                    1,
+                    2,
+                    3
+                ]
+            }
+        ]
+    }
+]' WHERE `naziv`= 'vuk'
+
+212,
+00: 00,
+23: 59,   P30Z11 + P30Z1 + P30Z2 + P31Z3 + P31Z4 + P32Z2 + P32Z3 + P32Z1 , P31Z14 + P32Z13 + P32Z12 
+
+[
+    {
+        "zone": [
+            {
+                "lotNo": "6",
+                "zoneNo": "13"
+            },
+            {
+                "lotNo": "3",
+                "zoneNo": "10"
+            }
+        ],
+        "vremeDo": "23:59:00",
+        "vremeOd": "16:59:00"
+    },
+    {
+        "zone": [
+            {
+                "lotNo": "6",
+                "zoneNo": "13"
+            },
+            {
+                "lotNo": "3",
+                "zoneNo": "10"
+            }
+        ],
+        "vremeDo": "16:59:00",
+        "vremeOd": "07:01:00"
+    },
+    {
+        "zone": [
+            {
+                "lotNo": "6",
+                "zoneNo": "13"
+            },
+            {
+                "lotNo": "3",
+                "zoneNo": "10"
+            }
+        ],
+        "vremeDo": "07:00:00",
+        "vremeOd": "00:00:00"
+    }
+]

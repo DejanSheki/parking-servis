@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PE Info</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="./dbPodaci">Pregled</a>
+      <a href="./mapa">Mapa</a>
+      <a href="./01users">Korisnici</a>
+      <div class="dropdown">
+        <button id="dropdown-btn-locations">
+          Uredjaji <span class="caret"></span>
+        </button>
+        <div class="item-list-locations">
+          <a href="./03locations">Dodavanje i izmena</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button id="dropdown-btn">Objekti <span class="caret"></span></button>
+        <div class="item-list">
+          <a href="./02zones">Dodavanje i izmena P-INFO</a>
+          <a href="./sensitZones">Dodavanje i izmena SENSIT</a>
+          <a href="./statistika">Statistika</a>
+        </div>
+      </div>
+      <div class="user">
+        <span id="user"></span>
+        <a href="/" id="logout">Odjava &#10162;</a>
+      </div>
+    </nav>
+    <div class="insert-zone">
+      <form id="insertNewZone" class="insert-zone-input">
+        <label for="zoneNumber">Br. lokacije: </label>
+        <input
+          type="text"
+          id="zoneNumber"
+          name="zoneNumber"
+          required
+          placeholder="1"
+        />
+        <label for="zoneShort">Oznaka: </label>
+        <input
+          type="text"
+          id="zoneShort"
+          name="zoneShort"
+          required
+          placeholder="Sd001"
+        />
+        <label for="zoneName">Naziv: </label>
+        <input
+          type="text"
+          name="zoneName"
+          id="zoneName"
+          required
+          placeholder="Ugao Njegoševe i Beogradske"
+        />
+        <label for="SlocOpisLokacije">Opis: </label>
+        <input
+          type="text"
+          name="SlocOpisLokacije"
+          id="SlocOpisLokacije"
+          required
+        />
+        <label for="disp1tip">Displ 1 tip: </label>
+        <input
+          type="text"
+          name="disp1tip"
+          id="disp1tip"
+          required
+          placeholder="reg/inv"
+        />
+        <label for="disp2tip">Displ 2 tip: </label>
+        <input
+          type="text"
+          name="disp2tip"
+          id="disp2tip"
+          required
+          placeholder="reg/inv"
+        />
+        <label for="disp1opis">Displ 1 opis: </label>
+        <input
+          type="text"
+          name="disp1opis"
+          id="disp1opis"
+          required
+          placeholder="Njegoševa |"
+        />
+        <label for="disp2opis">Displ 2 opis: </label>
+        <input
+          type="text"
+          name="disp2opis"
+          id="disp2opis"
+          required
+          placeholder="x"
+        />
+        <div class="zaDispl">
+          <div class="timeContainer">
+            <p>Za displ 1:</p>
+            <select name="" id="selectTimeDisp1">
+              <option value="0" selected>Izaberi vreme</option>
+              <option value="1">Od 00:00 do 23:59</option>
+              <option value="2">
+                Od 00:00 do 07:00 - <br />
+                Od 07:01 do 16:59 - <br />
+                Od 17:00 do 23:59
+              </option>
+            </select>
+          </div>
+          <div class="smallInput" id="newInputContainer"></div>
+        </div>
+        <div class="zaDispl">
+          <div class="timeContainer">
+            <p>Za displ 2:</p>
+            <select name="" id="selectTimeDisp2">
+              <option value="0" selected>Izaberi vreme</option>
+              <option value="1">Od 00:00 do 23:59</option>
+              <option value="2">
+                Od 00:00 do 07:00 - <br />
+                Od 07:01 do 16:59 - <br />
+                Od 17:00 do 23:59
+              </option>
+            </select>
+          </div>
+          <div class="smallInput" id="newInputContainerDisp2"></div>
+        </div>
+        <button type="submit" id="submit">Dodaj</button>
+        <button id="close">Otkaži</button>
+      </form>
+    </div>
+    <div class="container">
+      <div class="header">
+        <h2>Pregled objekata</h2>
+        <button id="zoneAdd">Dodaj novi objekat</button>
+      </div>
+      <table class="table table-sensit sensitZone">
+        <thead>
+          <tr>
+            <th>Oznaka</th>
+            <td>Lokacija</td>
+            <td>Opis lokacije</td>
+            <td>Br. lok</td>
+            <td>Disp 1 tip</td>
+            <td>Disp 2 tip</td>
+            <td>Disp 1 opis</td>
+            <td>Disp 2 opis</td>
+            <td>Disp 1</td>
+            <td>Disp 2</td>
+            <td>Disp 1 val.</td>
+            <td>Disp 2 val.</td>
+          </tr>
+        </thead>
+        <tbody id="sensitTable"></tbody>
+      </table>
+    </div>
+    <div class="edit-container">
+      <form id="editInput" class="edit-location-input"></form>
+    </div>
+    <script src="./main.js"></script>
+    <script src="./sensitZones.js"></script>
+  </body>
+</html>

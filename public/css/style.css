@@ -38,12 +38,27 @@ button:hover {
 .editBtn {
   width: 70px;
 }
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: rgb(161, 161, 161);
+  opacity: 1; /* Firefox */
+}
 
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: rgb(161, 161, 161);
+}
+
+::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: rgb(161, 161, 161);
+}
 select,
 input {
   border: 1px solid #9b9b9b;
   background: transparent;
   height: 28px;
+  margin: 0 0 5px 5px;
 }
 .remove {
   display: none !important;
@@ -224,6 +239,7 @@ section {
 }
 .edit-container-show {
   display: flex !important;
+  overflow-y: scroll;
 }
 .edit-location-input,
 .insert-location-input,
@@ -240,9 +256,7 @@ section {
   top: 50px;
   bottom: 0;
 }
-.edit-location-input {
-  height: 100%;
-}
+.edit-location-input,
 .insert-location-input,
 .insert-form,
 .insert-zone-input {
@@ -278,4 +292,103 @@ section {
   width: 40%;
   margin: 30px auto auto;
   cursor: pointer;
+}
+
+.smallInput {
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  flex: 0 0 60%;
+  flex-direction: column;
+  padding: 2rem;
+}
+.zaDispl {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.smallInput input {
+  flex: 0 0 5% !important;
+  max-width: 35px;
+}
+.zaDispl input {
+  max-width: 140px;
+}
+.smallInput input:nth-child(even) {
+  min-width: 60px;
+}
+#inputAddBtn,
+#inputAddBtnDisp2,
+.inputAddBtn,
+.inputAddBtnDisp2,
+#inputAddBtnDisp2Edit,
+#inputAddBtnEdit {
+  width: 10px !important;
+  /* height: 25px !important; */
+  margin: 0 0 0 10px !important;
+  padding: 0.3rem 1rem;
+}
+.timeContainer {
+  display: flex;
+  justify-content: center;
+  flex: 0 0 28%;
+  flex-direction: column;
+  margin-top: 10px;
+}
+.timeContainer select {
+  margin-top: 10px;
+  max-height: 28px;
+}
+
+.sensitZone td {
+  width: auto;
+}
+.sensitZone td:nth-child(10) {
+  overflow-x: auto;
+  width: auto;
+  display: table-cell;
+}
+
+.displ1,
+.displ2 {
+  width: 710px !important;
+}
+.displ1 label,
+.displ2 label {
+  margin-left: 10px;
+  width: 15%;
+}
+.displ1 p,
+.displ2 p {
+  margin: 10px 0;
+  font-weight: 600;
+}
+.displ1 #lotNo,
+.displ2 #lotNo {
+  width: 28px;
+  text-align: center;
+  padding: 0;
+  border: 1px solid #e3e3e3;
+}
+.displ1 #zoneNo,
+.displ2 #zoneNo {
+  padding-left: 5px;
+  text-align: start;
+  width: 100px;
+  border: 1px solid #e3e3e3;
+}
+.padding {
+  padding: 1.2rem;
+}
+@media (min-width: 2600px) {
+  .displ1,
+  .displ2 {
+    width: 722px !important;
+  }
+}
+@media (min-width: 3840px) {
+  .displ1,
+  .displ2 {
+    width: 1390px !important;
+  }
 }

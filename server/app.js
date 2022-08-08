@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const email = require('./email');
-const net = require('./net-ceo2');
+// const net = require('./net-ceo2');
 const fs = require('fs');
 dotenv.config();
 
@@ -40,6 +40,9 @@ app.get('/03locations', (request, response) => {
 });
 app.get('/02zones', (request, response) => {
     response.sendFile(path.join(__dirname, '../public/02zones.html'));
+});
+app.get('/sensitZones', (request, response) => {
+    response.sendFile(path.join(__dirname, '../public/sensitZones.html'));
 });
 app.get('/test', (request, response) => {
     response.sendFile(path.join(__dirname, '../public/test.html'));
@@ -93,6 +96,38 @@ app.get('/get46finalSensit', (request, response) => {
     result.then(data => response.json(data))
         .catch(err => console.log(err));
 });
+app.get('/getSensitZone', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    const result = db.getSensitZone();
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
+app.patch('/getSensitDataByID', (request, response) => {
+    const locID = request.body;
+    console.log(locID);
+    const db = dbService.getDbServiceInstance();
+    const result = db.getSensitDataByID(locID.ID);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err));
+});
+app.patch('/updateSensitZone', (request, response) => {
+    const sensitUpdate = request.body;
+    const zaDisp1 = JSON.stringify(sensitUpdate.zaDisp1);
+    const zaDisp2 = JSON.stringify(sensitUpdate.zaDisp2);
+    const db = dbService.getDbServiceInstance();
+    const result = db.updateSensitZone(sensitUpdate.zoneName, sensitUpdate.SlocOpisLokacije, sensitUpdate.disp1tip, sensitUpdate.disp2tip, sensitUpdate.disp1opis, sensitUpdate.disp2opis, zaDisp1, zaDisp2, sensitUpdate.zoneShort);
+    result
+        .then(data => response.json({ success: data }))
+        .catch(err => console.log(err));
+});
+app.patch('/deleteSensitZone', (request, response) => {
+    const zoneID = request.body.ID;
+    console.log(zoneID);
+    const db = dbService.getDbServiceInstance();
+    const result = db.deleteSensitZone(zoneID);
+    result.then(data => console.log(data))
+        .catch(err => console.log(err));
+});
 // create 
 app.post('/insertNewUser', (request, response) => {
     const user = request.body;
@@ -115,6 +150,15 @@ app.post('/insertNewZone', (request, response) => {
     const zone = request.body;
     const db = dbService.getDbServiceInstance();
     const result = db.insertNewZone(zone.zoneNumber, zone.zoneName, zone.zoneShort, zone.zoneLokacija, zone.zoneLat, zone.zoneLong, zone.zoneMaxFree, zone.zoneCreatedByID);
+    result
+        .then(data => console.log(data))
+        .catch(err => console.log(err));
+});
+app.post('/insertNewSensitZone', (request, response) => {
+    const zone = request.body;
+    console.log(zone);
+    const db = dbService.getDbServiceInstance();
+    const result = db.insertNewSensitZone(Number(zone.zoneNumber), zone.zoneShort, zone.zoneName, zone.SlocOpisLokacije, zone.disp1tip, zone.disp2tip, zone.disp1opis, zone.disp2opis, JSON.stringify(zone.zaDisp1), JSON.stringify(zone.zaDisp2), zone.zoneCreatedByID);
     result
         .then(data => console.log(data))
         .catch(err => console.log(err));

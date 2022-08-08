@@ -354,7 +354,7 @@ class DbService {
                 const query = "INSERT INTO zonefree (zoneShort, zoneMaxFree, zoneFreeNow, zoneDT) VALUES (?,?,?, CURRENT_TIMESTAMP)";
                 connection.query(query, [zoneShort, zoneMaxFree, zoneFreeNow], (err, result) => {
                     if (err) reject(new Error(err.message));
-                    resolve(result.protocol41);
+                    resolve(result);
                 })
             });
             return insertZone;
@@ -383,7 +383,7 @@ class DbService {
                 const query = "INSERT INTO 24nedapjson (bay, zone, lot) VALUE (?,?,?)";
                 connection.query(query, [bay, zone, lot], (err, result) => {
                     if (err) reject(new Error(err.message));
-                    resolve(result.affectedRows);
+                    resolve(result);
                 })
             });
             return response === 1 ? true : false;
@@ -540,12 +540,15 @@ class DbService {
             return false;
         }
     }
-    async update46final(zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) {
+    // async update46final(zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) {
+    async update46final(ZaDisplej1, ZaDisplej2, zoneShort) {
         try {
             const response = await new Promise((resolve, reject) => {
-                // const query = "UPDATE 46final SET zoneShort = ?, lokacija = ?, zoneName = ?, disp1opis = ?, disp2opis = ?, ZaDisplej1 = ?, ZaDisplej2 = ?, disp1tip = ?, disp2tip = ? WHERE dispID = ?;";
-                const query = "INSERT INTO 46final (zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE zoneShort = VALUES(zoneShort), lokacija = VALUES(lokacija), zoneName = VALUES(zoneName), disp1opis = VALUES(disp1opis), disp2opis = VALUES(disp2opis), ZaDisplej1 = VALUES(ZaDisplej1), ZaDisplej2 = VALUES(ZaDisplej2), disp1tip = VALUES(disp1tip), disp2tip = VALUES(disp2tip);";
-                connection.query(query, [zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip], (err, result) => {
+                const query = "UPDATE 46final SET ZaDisplej1 = ?, ZaDisplej2 = ? WHERE zoneShort = ?;";
+                // const query = "UPDATE 46final SET zoneShort = ?, lokacija = ?, zoneName = ?, disp1opis = ?, disp2opis = ?, ZaDisplej1 = ?, ZaDisplej2 = ?, disp1tip = ?, disp2tip = ? WHERE zoneShort = ?;";
+                // const query = "INSERT INTO 46final (zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE zoneShort = VALUES(zoneShort), lokacija = VALUES(lokacija), zoneName = VALUES(zoneName), disp1opis = VALUES(disp1opis), disp2opis = VALUES(disp2opis), ZaDisplej1 = VALUES(ZaDisplej1), ZaDisplej2 = VALUES(ZaDisplej2), disp1tip = VALUES(disp1tip), disp2tip = VALUES(disp2tip);";
+                // connection.query(query, [zoneShort, lokacija, zoneName, disp1opis, disp2opis, ZaDisplej1, ZaDisplej2, disp1tip, disp2tip, zoneShort], (err, result) => {
+                connection.query(query, [ZaDisplej1, ZaDisplej2, zoneShort], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
                 })
@@ -797,7 +800,218 @@ class DbService {
             return false;
         }
     }
+
+    // Insert New Sensit
+    async sensitFree2(bay, zone, lot) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "INSERT INTO 24nedapjson2 (bay, zone, lot) VALUE (?,?,?)";
+                connection.query(query, [bay, zone, lot], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response === 1 ? true : false;
+        } catch (error) {
+            return false;
+        }
+    }
+    async create31LotZoneSum2() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = 'CREATE TABLE 31lotzonesum2 SELECT `lot`, `zone`, COUNT(*) AS `ukupno` FROM `24nedapjson2` GROUP BY `lot`, `zone`;'
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async deleteFromSensitFree2() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "DELETE FROM 24nedapjson2";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async dropSumTables2() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "DROP TABLE 31lotzonesum2";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async insertNewSensitZone(zoneNumber, zoneShort, zoneName, SlocOpisLokacije, disp1tip, disp2tip, disp1opis, disp2opis, zaDisp1, zaDisp2, zoneCreatedByID) {
+        try {
+            const insertZone = await new Promise((resolve, reject) => {
+                const query = "INSERT INTO sensitzone (zoneNumber, zoneShort, zoneName, SlocOpisLokacije, disp1tip, disp2tip, disp1opis, disp2opis, zaDisp1, zaDisp2, zoneCreatedByID) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                connection.query(query, [zoneNumber, zoneShort, zoneName, SlocOpisLokacije, disp1tip, disp2tip, disp1opis, disp2opis, zaDisp1, zaDisp2, zoneCreatedByID], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    // console.log(result);
+                    resolve(result);
+                })
+            });
+            return {
+                insertZone
+            };
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async getSensitData(zoneShort) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM sensitzone WHERE zoneShort = ?;";
+                connection.query(query, [zoneShort], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async getSensitZoneShort() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT zoneShort FROM sensitzone;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async get31LotZoneSum(lot) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM 31lotzonesum2 WHERE lot = ?;";
+                connection.query(query, [lot], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async getSensitZone() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM sensitzone;";
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async updateSensitZoneDisplay1(zaDisp1val, zoneShort) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE sensitzone SET zaDisp1val = ? WHERE zoneShort = ?";;
+                connection.query(query, [zaDisp1val, zoneShort], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async updateSensitZoneDisplay2(zaDisp2val, zoneShort) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE sensitzone SET zaDisp2val = ? WHERE zoneShort = ?";;
+                connection.query(query, [zaDisp2val, zoneShort], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async getSensitDataByID(ID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM sensitzone WHERE ID = ?;";
+                connection.query(query, [ID], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+            // console.log(response);
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async updateSensitZone(zoneName, SlocOpisLokacije, disp1tip, disp2tip, disp1opis, disp2opis, zaDisp1, zaDisp2, zoneShort) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE sensitzone SET zoneName = ?, SlocOpisLokacije = ?, disp1tip =? , disp2tip = ?, disp1opis = ?, disp2opis = ?, zaDisp1= ?, zaDisp2= ?  WHERE zoneShort = ?;";
+                connection.query(query, [zoneName, SlocOpisLokacije, disp1tip, disp2tip, disp1opis, disp2opis, zaDisp1, zaDisp2, zoneShort], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    async deleteSensitZone(zoneID) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "DELETE FROM sensitzone WHERE ID = ?;";
+                connection.query(query, [zoneID], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                });
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
 }
 
 module.exports = DbService;
-

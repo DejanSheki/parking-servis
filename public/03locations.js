@@ -191,6 +191,7 @@ function createTable(dbData) {
                     .then(data => data.json())
             ])
                 .then((dbData) => {
+                    console.log(dbData);
                     const { locCreatedByID, locDisabledByID } = dbData[0][0];
                     const { userFLname } = dbData[2].find(e => e.userID === locCreatedByID);
                     console.log(userFLname);
@@ -206,8 +207,8 @@ function createTable(dbData) {
                         }
                     }
                     const disabledByName = userName();
-                    console.log(disabledByName);
-                    console.log(locDisabledByID);
+                    // console.log(disabledByName);
+                    // console.log(locDisabledByID);
                     createEditInput(dbData, userFLname, disabledByName);
                     createOptions(dbData);
                 })

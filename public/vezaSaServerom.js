@@ -699,6 +699,7 @@ async function updateTable() {
     // Sensit
     const fetchLink = "http://192.168.0.10:2021/get46finalSensit";
     const data = await fetchApi(fetchLink);
+    console.log(data);
     data.forEach(dat => {
         const sensitDisplays = document.querySelectorAll(`.${dat.zoneShort}`);
         sensitDisplays[0].cells[3].innerHTML = dat.ZaDisplej1;
@@ -715,6 +716,7 @@ async function updateTable() {
     ]).then((dbData) => {
         dbData[0].forEach(dat => {
             const displayCells = document.querySelector(`.${model(dat).locModel}`);
+            displayCells.style.backgroundColor = dat.locColor;
             displayCells.cells[2].innerHTML = `${display(dbData, dat).d1}  ${displayValue(dbData, dat).d1}`;
             displayCells.cells[2].style.backgroundColor = `${displayBg(dbData, dat).bg1}`;
             displayCells.cells[3].innerHTML = `${display(dbData, dat).d2}  ${displayValue(dbData, dat).d2}`;
@@ -723,9 +725,13 @@ async function updateTable() {
             displayCells.cells[4].style.backgroundColor = `${displayBg(dbData, dat).bg3}`;
             displayCells.cells[5].innerHTML = `${display(dbData, dat).d4}  ${displayValue(dbData, dat).d4}`;
             displayCells.cells[5].style.backgroundColor = `${displayBg(dbData, dat).bg4}`;
+            displayCells.cells[6].innerHTML = reverseString(dat.locLastCommTD);
+            displayCells.cells[7].innerHTML = `${lastPacket(dbData, dat.locLname, dat.locNumber).icon} &nbsp; <i class="fa fa-car-battery"></i> ${lastPacket(dbData, dat.locLname, dat.locNumber).diagn.accuNapon} &nbsp; ${thermometer}${lastPacket(dbData, dat.locLname, dat.locNumber).diagn.accuTemp}`;
+            displayCells.cells[7].style.backgroundColor = `${lastPacket(dbData, dat.locLname, dat.locNumber).bg}`;
         });
     })
 }
-setInterval(updateTable, 3000);
+setInterval(updateTable, 30000);
 
 
+// <td style="background-color: ${lastPacket(dbData, dat.locLname, dat.locNumber).bg};">${lastPacket(dbData, dat.locLname, dat.locNumber).icon} &nbsp; <i class="fa fa-car-battery"></i> ${lastPacket(dbData, dat.locLname, dat.locNumber).diagn.accuNapon} &nbsp; ${thermometer}${lastPacket(dbData, dat.locLname, dat.locNumber).diagn.accuTemp}</td>

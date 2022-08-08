@@ -1,6 +1,6 @@
 const fileService = require('./fileService');
 const dbService = require('./dbService');
-
+const db = dbService.getDbServiceInstance();
 // Kalkulator procenta popunjenosti
 function percentageCalculator(zauzeto, kapacitet) {
     let result = ((zauzeto / kapacitet) * 100).toFixed();
@@ -21,7 +21,7 @@ function bgColor(popunjenost) {
 }
 
 const checkLastFreeNow = (zoneShort) => {
-    const db = dbService.getDbServiceInstance();
+    // const db = dbService.getDbServiceInstance();
     const result1 = db.getZonesFreeNow(zoneShort);
     return result1
         .then(data => {
@@ -61,7 +61,7 @@ async function insertZoneFreeNow(zoneShort) {
             let occupiedSpace = check.zoneMaxFree - freeNow;
             let zoneOccup = percentageCalculator(occupiedSpace, check.zoneMaxFree);
             let zoneColor = bgColor(zoneOccup);
-            const db = dbService.getDbServiceInstance();
+            // const db = dbService.getDbServiceInstance();
             const result1 = db.insertFreeNowData(freeNow, zoneOccup, zoneColor, zoneUpDnEq, zoneShort);
             result1
                 .then(data => console.log(data.message))
@@ -80,21 +80,21 @@ const interval = setInterval(() => {
     insertZoneFreeNow('pol');
     insertZoneFreeNow('kam');
     insertZoneFreeNow('vis');
-    // insertZoneFreeNow('cuk');
-    // insertZoneFreeNow('bv');
+    insertZoneFreeNow('cuk');
+    insertZoneFreeNow('bv');
     insertZoneFreeNow('bba');
-    // insertZoneFreeNow('onbg');
+    insertZoneFreeNow('onbg');
     insertZoneFreeNow('vma');
     insertZoneFreeNow('obi');
     insertZoneFreeNow('zel');
     insertZoneFreeNow('mas');
     insertZoneFreeNow('pio');
-    // insertZoneFreeNow('drak');
-    // insertZoneFreeNow('scn');
-    // insertZoneFreeNow('bel');
+    insertZoneFreeNow('drak');
+    insertZoneFreeNow('scn');
+    insertZoneFreeNow('bel');
     insertZoneFreeNow('ada');
-    // insertZoneFreeNow('kap');
-    // insertZoneFreeNow('zsnbg');
+    insertZoneFreeNow('kap');
+    insertZoneFreeNow('zsnbg');
 }, 30000);
 
 async function insertFreeNowDataStatistic(zoneShort) {
@@ -111,7 +111,7 @@ async function insertFreeNowDataStatistic(zoneShort) {
             } else {
                 freeNow = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
             }
-            const db = dbService.getDbServiceInstance();
+            // const db = dbService.getDbServiceInstance();
             const result1 = db.insertFreeNowDataStatistic(zoneShort, check.zoneMaxFree, freeNow);
             result1
                 .then(data => console.log(data))

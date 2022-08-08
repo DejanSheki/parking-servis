@@ -80,7 +80,10 @@ let transporter = nodemailer.createTransport({
 //
 
 let instance = null;
-
+let from = {
+    name: `PE Info`,
+    address: `dejan.lukic@pinfo.rs`
+}
 class sendEmail {
     static getEmailInstance() {
         return instance ? instance : new sendEmail();
@@ -97,9 +100,9 @@ class sendEmail {
             console.log(zaSlanje);
             // userData = 
             transporter.sendMail({
-                from: 'dejan.lukic@pinfo.rs',
-                to: 'dejan.sheki.lukic@gmail.com',
-                subject: `Svi podaci`,
+                from: from,
+                to: 'dspcontroldejan@gmail.com',
+                subject: `Sensit`,
                 text: zaSlanje
             }, function (err, info) {
                 if (err) {

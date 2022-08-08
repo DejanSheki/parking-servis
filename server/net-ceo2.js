@@ -3,8 +3,8 @@ const port = 2022;
 let podaciSaTable = '';
 const fileService = require('./fileService');
 const dbService = require('./dbService');
-// const { stringify } = require('querystring');
-// let sendEmail = require('./email');
+const sendEmail = require('./email');
+const email = sendEmail.getEmailInstance();
 
 const server = net.createServer((socket) => {
     console.log(`${Date()} Client connected.. ${socket.remoteAddress} : ${socket.remotePort}`);
@@ -423,8 +423,3 @@ CRC.padLeft = function (s, w, pc) {
     return s;
 };
 
-// const crcData = CRC.ToCRC16([
-//     '01,017,001,002,003,004,0555,0666,0777,1,0,0,0,0,0700,0600,0500,0000,0,1,0,0000,0,11111,22222,33333,4444444444,5555555555555555555555,111.222.333.444,m95v567890123,135,11.0_,'
-// ])
-
-// console.log(crcData);

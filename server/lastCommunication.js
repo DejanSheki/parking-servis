@@ -112,7 +112,7 @@ function lastComm() {
             const notCommunicate = notNull.filter(d => new Date(d.locLastCommTD) <= fiveMinuteAgo)
             // console.log(notCommunicate);
             notCommunicate.forEach(dat => {
-                console.log(dat.locID);
+                // console.log(dat.locID);
                 const result = db.updateLastCommunication('#b4b4b4', dat.locID);
             })
             const communicate = data.filter(d => new Date(d.locLastCommTD) > fiveMinuteAgo);
