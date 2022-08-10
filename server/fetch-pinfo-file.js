@@ -1,4 +1,6 @@
 const { exec } = require("child_process");
+const dotenv = require('dotenv');
+dotenv.config();
 
 const ipAndfolder = [
     { ip: '192.168.62.62', folder: 'obi' },
@@ -30,7 +32,7 @@ const ipAndfolder = [
 const interval = setInterval(() => {
     ipAndfolder.forEach(f => {
         console.log(`ip: ${f.ip}, folder: ${f.folder}`);
-        exec(`curl  -k "sftp://${f.ip}:/newsys/transfer/PLS.008" --user "ZR20010:ZR20010" -o "/home/dejan/Desktop/parkingServis/node_express/server/objekti/${f.folder}/PLS.008"`, (error, stdout, stderr) => {
+        exec(`curl  -k "sftp://${f.ip}:/newsys/transfer/PLS.008" --user ${process.env.ZR} -o "/home/dejan/Desktop/parkingServis/node_express/server/objekti/${f.folder}/PLS.008"`, (error, stdout, stderr) => {
             if (error) {
                 console.log(`error: ${error.message}`);
                 return;
