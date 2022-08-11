@@ -430,10 +430,8 @@ function display2(data, zoneShort) {
                                 display2.push(r.ukupno);
                             }
                         })
-                        // console.log('Display2: ' + display2);
                         if (display2.length > 0) {
                             const zaDisp2val = display2.reduce((acc, curr) => parseInt(curr) + parseInt(acc), 0);
-                            console.log('tttt ' + zaDisp2val);
                             db.updateSensitZoneDisplay2(zaDisp2val, zoneShort);
                         } if (display2.length === 0) {
                             const zaDisp2val = 0;

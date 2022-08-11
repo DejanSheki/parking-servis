@@ -1,6 +1,8 @@
 const fileService = require('./fileService');
+const file = fileService.getFileServiceInstance();
 const dbService = require('./dbService');
 const db = dbService.getDbServiceInstance();
+
 // Kalkulator procenta popunjenosti
 function percentageCalculator(zauzeto, kapacitet) {
     let result = ((zauzeto / kapacitet) * 100).toFixed();
@@ -21,7 +23,6 @@ function bgColor(popunjenost) {
 }
 
 const checkLastFreeNow = (zoneShort) => {
-    // const db = dbService.getDbServiceInstance();
     const result1 = db.getZonesFreeNow(zoneShort);
     return result1
         .then(data => {
@@ -36,7 +37,6 @@ const checkLastFreeNow = (zoneShort) => {
 
 async function insertZoneFreeNow(zoneShort) {
     const check = await checkLastFreeNow(zoneShort);
-    const file = fileService.getFileServiceInstance();
     const result = file.locations(zoneShort);
     result
         .then(data => {
@@ -61,7 +61,6 @@ async function insertZoneFreeNow(zoneShort) {
             let occupiedSpace = check.zoneMaxFree - freeNow;
             let zoneOccup = percentageCalculator(occupiedSpace, check.zoneMaxFree);
             let zoneColor = bgColor(zoneOccup);
-            // const db = dbService.getDbServiceInstance();
             const result1 = db.insertFreeNowData(freeNow, zoneOccup, zoneColor, zoneUpDnEq, zoneShort);
             result1
                 .then(data => console.log(data.message))
@@ -99,8 +98,6 @@ const interval = setInterval(() => {
 
 async function insertFreeNowDataStatistic(zoneShort) {
     const check = await checkLastFreeNow(zoneShort);
-    console.log(check.zoneMaxFree);
-    const file = fileService.getFileServiceInstance();
     const result = file.locations(zoneShort);
     result
         .then(data => {
@@ -111,7 +108,6 @@ async function insertFreeNowDataStatistic(zoneShort) {
             } else {
                 freeNow = slMesta[1] + slMesta[2] + slMesta[3].replace(/(\r\n|\n|\r)/gm, "");
             }
-            // const db = dbService.getDbServiceInstance();
             const result1 = db.insertFreeNowDataStatistic(zoneShort, check.zoneMaxFree, freeNow);
             result1
                 .then(data => console.log(data))
