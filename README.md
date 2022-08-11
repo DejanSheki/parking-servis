@@ -1,7 +1,7 @@
 # Parking servis
 
-✅ CentOS7
-✅ NodeJS
+✅ CentOS7 <br>
+✅ NodeJS <br>
 ✅ JavaScript
 ✅ CSS
 ✅ HTML
