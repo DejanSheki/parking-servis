@@ -2,8 +2,8 @@
 
 ✅ CentOS7 <br>
 ✅ NodeJS <br>
-✅ JavaScript
-✅ CSS
-✅ HTML
-✅ MySQL
-✅ Express
+✅ JavaScript <br>
+✅ CSS <br>
+✅ HTML <br>
+✅ MySQL <br>
+✅ Express <br>
