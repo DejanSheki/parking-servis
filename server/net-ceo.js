@@ -2,6 +2,7 @@ const net = require('net');
 const port = 2020;
 let podaciSaTable = '';
 const dbService = require('./dbService');
+const db = dbService.getDbServiceInstance();
 const FileService = require('./fileService');
 // let sendEmail = require('./email');
 
@@ -58,7 +59,6 @@ const server = net.createServer((socket) => {
             Sgn: tabla[32],
             checksum: tabla[33],
         }
-        const db = dbService.getDbServiceInstance();
         const result1 = db.updateLocatiOnLastPacket(podaciSaTable[0], objTabla.displej1, objTabla.displej2, objTabla.displej3, objTabla.displej4, objTabla.adresa);
         result1
             .then(data => console.log('Last packet update: ' + data))
@@ -100,7 +100,6 @@ const server = net.createServer((socket) => {
                     })
                     .catch(err => console.log(err));
             } else {
-                const db = dbService.getDbServiceInstance();
                 const dbResult = db.getLocationsDataByLocNumber(objTabla.adresa);
                 dbResult
                     .then(data => {
@@ -109,11 +108,9 @@ const server = net.createServer((socket) => {
                         displayData.locDisp2zoneID = data[0].locDisp2zoneID;
                         displayData.locDisp3zoneID = data[0].locDisp3zoneID;
                         displayData.locDisp4zoneID = data[0].locDisp4zoneID;
-                        const db = dbService.getDbServiceInstance();
                         const dbResult = db.getZoneDataByID(displayData.locDisp1zoneID, displayData.locDisp2zoneID, displayData.locDisp3zoneID, displayData.locDisp4zoneID);
                         dbResult
                             .then(data => {
-                                console.log(data);
                                 const displej1 = () => {
                                     if (data.find(dat => dat.zoneShort === displayData.locDisp1zoneID) === undefined) {
                                         return '000';
