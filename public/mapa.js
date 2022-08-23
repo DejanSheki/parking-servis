@@ -4,6 +4,7 @@ const content = document.getElementById("popup-content");
 const closer = document.getElementById("popup-closer");
 const user = document.querySelector('#user');
 user.innerHTML = sessionStorage.loggedUser;
+let boja;
 
 // Kalkulator procenta popunjenosti
 function percentageCalculator(zauzeto, kapacitet) {
@@ -27,14 +28,10 @@ const overlay = new ol.Overlay({
 });
 
 let obradjeniPodaci = [];
-let style = [];
 let iconStyle;
 async function getData() {
-    const dataFetch = await fetch("http://192.168.0.10:2021/getAllActiveZonesData");
+    const dataFetch = await fetch("http://192.168.42.42:2021/getAllActiveZonesData");
     const podaci = await dataFetch.json();
-    // podaci.map((item) => {
-    //     console.log(item);
-    // })
     podaci.map(podatak => {
         console.log(podatak);
         // let koordinate = podatak.koordinate.match(/\d+(?:\.\d+)?/g).map(Number);
@@ -45,59 +42,45 @@ async function getData() {
         podatak = new ol.Feature({
             geometry: new ol.geom.Point(ol.proj.fromLonLat(koordinate)),
             ime: lokacija.toString(),
-            podaci: podatak.naziv_lokacije,
+            podaci: podatak.zoneShort,
             popunjenost: popunjenost,
             slMesta: parseInt(podatak.zoneFreeNow).toString(),
         });
-        iconStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 15,
-                stroke: new ol.style.Stroke({
-                    color: '#ee0b0b',
-                    width: 1
-                }),
-                fill: new ol.style.Fill({
-                    color: 'green',
-                }),
-            }),
-        });
         obradjeniPodaci.push(podatak);
-        style.push(iconStyle);
-        // console.log(boja);
     });
 }
 
-// let iconStyle = new ol.style.Style({
-//     image: new ol.style.Circle({
-//         radius: 15,
-//         stroke: new ol.style.Stroke({
-//             color: '#ee0b0b',
-//             width: 1
-//         }),
-//         fill: new ol.style.Fill({
-//             color: '#18066b'
-//         }),
-//     }),
-// });
+iconStyle = new ol.style.Style({
+    image: new ol.style.Circle({
+        radius: 15,
+        stroke: new ol.style.Stroke({
+            color: 'rgba(255, 247, 0, 0.204)',
+            width: 1
+        }),
+        fill: new ol.style.Fill({
+            color: '#0938d1',
+        }),
+    }),
+});
 let labelStyle = new ol.style.Style({
     text: new ol.style.Text({
-        font: '15px Calibri, sans-serif',
+        font: '12px Calibri, sans-serif',
         overflow: true,
         fill: new ol.style.Fill({
             color: '#e5ebf1'
         }),
         stroke: new ol.style.Stroke({
-            color: '#dde1e6',
+            color: '#000000',
             width: 1
         }),
     })
 });
-style.push(labelStyle)
-// let style = [iconStyle, labelStyle];
-let map;
-kreirajMapu()
 
-async function kreirajMapu() {
+let style = [iconStyle, labelStyle];
+let map;
+mapCreate()
+
+async function mapCreate() {
     await getData();
     map = new ol.Map({
         target: 'map',
@@ -112,16 +95,15 @@ async function kreirajMapu() {
                     features: obradjeniPodaci
                 }),
                 style: (feature) => {
-                    labelStyle.getText().setText(feature.get('ime'));
-                    if (feature.get('popunjenost') > 50) {
-                        boja = '#310562';
-                        console.log(boja);
+                    labelStyle.getText().setText(feature.get('podaci'));
+                    if (feature.get('popunjenost') < 50) {
+                        boja = '#0938d1';
+                        iconStyle.getImage().getFill().setColor(boja);
                     } else {
-                        console.log(feature.get('popunjenost'));
-                        boja = '#4e066b';
-                        console.log(boja);
+                        boja = '#d11818';
+                        iconStyle.getImage().getFill().setColor(boja);
                     }
-                    iconStyle.getImage().getFill().setColor(boja);
+                    // iconStyle.getImage().getFill().setColor(boja);
                     return style;
                 }
             })
@@ -131,7 +113,7 @@ async function kreirajMapu() {
             zoom: 13
         })
     })
-    map.on("singleclick", (evt) => {
+    map.on("click", (evt) => {
         if (map.getTargetElement().style.cursor = map.hasFeatureAtPixel(evt.pixel)) {
             const name = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
                 return feature.get("podaci");
